@@ -1,0 +1,9 @@
+*~
+/build
+/dep_build
+.DS_Store
+*.d
+*.o
+/.idea
+cmake-build-debug/
+arm_build/
