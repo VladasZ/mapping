@@ -70,5 +70,6 @@ namespace mapping {
 
     template <class  > struct is_class_info               : std::false_type { };
     template <class T> struct is_class_info<ClassInfo<T>> : std::true_type  { };
+    template <class T> constexpr bool is_class_info_t = is_class_info<cu::remove_all_t<T>>::value;
 
 }

@@ -40,19 +40,14 @@ namespace mapping {
 
         //MARK: - Tuple Check
 
-        template <class ClassInfo>
-        static constexpr void _check(bool& value, const ClassInfo&) {
-            if constexpr (!is_class_info<ClassInfo>::value) {
-                value = false;
-            }
-        }
-
         template <class T>
         static constexpr bool _tuple_is_valid(const T& tuple) {
             bool result = true;
-            std::apply([&](auto&&... args) {((
-                    _check(result, args)
-            ), ...);}, tuple);
+            std::apply([&](auto&&... args) {(([](auto& value, const auto& arg) {
+                if constexpr (!is_class_info_t<decltype(arg)>) {
+                    value = false;
+                }
+            } (result, args) ), ...);}, tuple);
             return result;
         }
 
