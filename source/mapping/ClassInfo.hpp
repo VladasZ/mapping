@@ -28,18 +28,18 @@ namespace mapping {
 
         using Class = typename _FirstPropertyType::Class;
 
-        static constexpr std::string_view name;
+        const std::string_view name;
         const Properties properties;
 
         const int spes = 12;
 
-        constexpr ClassInfo(const std::string_view name, const Properties props) : properties(props) {
+        constexpr ClassInfo(const std::string_view name, const Properties props) : name(name), properties(props) {
             static_assert(_tuple_is_valid(props));
         }
 
         std::string to_string() const {
             std::string result = std::string(name) + "\n";
-            cu::iterate_tuple(properties, [&](auto prop){
+            cu::iterate_tuple(properties, [&](const auto& prop){
                 result += prop.to_string() + "\n";
             });
             return result;

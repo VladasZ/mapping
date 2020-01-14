@@ -28,12 +28,24 @@ namespace mapping {
             static_assert(_tuple_is_valid(info));
         }
 
-        std::string to_string() const {
-            std::string result;
-            cu::iterate_tuple(classes_info, [&](auto info) {
-                result += info.to_string() + "\n";
+    public:
+
+        template <class T>
+        constexpr bool exists() const {
+            bool result = false;
+            cu::iterate_tuple(classes_info, [&](const auto& val) {
+                using Info = cu::remove_all_t<decltype(val)>;
+                if constexpr (std::is_same_v<T, typename Info::Class>) {
+                    result = true;
+                }
             });
             return result;
+        }
+
+        template <class T>
+        constexpr bool get() const {
+            static_assert(exists<T>());
+            return false;
         }
 
     private:
@@ -47,6 +59,16 @@ namespace mapping {
                 if constexpr (!is_class_info_t<decltype(val)>) {
                     result = false;
                 }
+            });
+            return result;
+        }
+
+    public:
+
+        std::string to_string() const {
+            std::string result;
+            cu::iterate_tuple(classes_info, [&](const auto& info) {
+                result += info.to_string() + "\n";
             });
             return result;
         }

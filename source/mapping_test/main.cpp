@@ -42,13 +42,9 @@ constexpr auto mapper = mapping::Mapper(std::make_tuple(CatsInfo, DogsInfo));
 int main() {
 
 
-    Cat cat;
-    cat.age = 143;
+    Logvar(mapper.to_string());
 
-
-    Log(mapping::TestClass().to_json());
-
-    //Logvar(ko);
+    Logvar(mapper.exists<Cat>());
 
 
     return 0;
