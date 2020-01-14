@@ -1,27 +1,55 @@
 
 #include "Log.hpp"
-#include "JSONMappable.hpp"
+#include "NewMapper.hpp"
+#include "TestJsonModels.hpp"
 
-class TestClass : public mapping::JSONMappable<TestClass> {
-
+class Dog {
 public:
 
-    int a = 10;
-    std::string b = "10";
+    int height;
 
-    static std::string class_name() {
-        return "TestClass";
+    static constexpr std::string_view class_name() {
+        return "Dog";
     }
+};
 
-    static auto properties() {
-        return std::make_tuple(
-                mapping::Property("a", &TestClass::a),
-                mapping::Property("b", &TestClass::b)
-        );
-    }
+class Cat {
+public:
+
+    int age;
+    int height;
 
 };
 
+constexpr auto CatsInfo = mapping::ClassInfo(
+        "Cat",
+        std::tuple(
+                mapping::Property("age",    &Cat::age   ),
+                mapping::Property("height", &Cat::height)
+        ));
+
+constexpr auto DogsInfo = mapping::ClassInfo(
+        "Dog",
+        std::tuple(
+                mapping::Property("height", &Dog::height)
+        ));
+
+constexpr auto mapper = mapping::Mapper(std::make_tuple(CatsInfo, DogsInfo));
+
+
+//constexpr auto has_cats = mapper.exists<Cat>();
+
 int main() {
-  Log(TestClass::parse(TestClass().to_json()).to_json());
+
+
+    Cat cat;
+    cat.age = 143;
+
+
+    Log(mapping::TestClass().to_json());
+
+    //Logvar(ko);
+
+
+    return 0;
 }

@@ -10,14 +10,14 @@
 
 #include <iostream>
 
-#include "IterateTuple.hpp"
+#include "MetaHelpers.hpp"
 
 namespace mapping {
 
     template <class Properties>
     class ClassInfo {
 
-        using _FirstPropertyType = typename std::tuple_element_t<0, Properties>;
+        using _FirstPropertyType = cu::first_tuple_type<Properties>;
 
         static_assert(cu::is_tuple<Properties>::value);
         static_assert(is_property<_FirstPropertyType>::value);
@@ -28,10 +28,12 @@ namespace mapping {
 
         using Class = typename _FirstPropertyType::Class;
 
-        const std::string_view name;
+        static constexpr std::string_view name;
         const Properties properties;
 
-        constexpr ClassInfo(const std::string_view name, const Properties props) : name(name), properties(props) {
+        const int spes = 12;
+
+        constexpr ClassInfo(const std::string_view name, const Properties props) : properties(props) {
             static_assert(_tuple_is_valid(props));
         }
 
@@ -48,7 +50,7 @@ namespace mapping {
         //MARK: - Tuple Check
 
         template <class Property>
-        static constexpr void _check(bool& value, const Property& param) {
+        static constexpr void _check(bool& value, const Property&) {
             if constexpr (is_property<Property>::value) {
                 value = true;
             }

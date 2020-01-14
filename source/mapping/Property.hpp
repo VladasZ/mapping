@@ -40,7 +40,6 @@ namespace mapping {
 
         static_assert(is_string || is_float || is_integer, "Invalid property type");
 
-        const std::string_view class_name = Class::class_name();
         const std::string_view member_name = database_type_name();
 
         const std::string_view name;
@@ -71,7 +70,7 @@ namespace mapping {
 
         std::string to_string() const {
             return std::string() +
-                   "Property: " + std::string(name) + " of: " + std::string(class_name) + " type: " + std::string(member_name);
+                   "Property: " + std::string(name) + " type: " + std::string(member_name);
         }
 
     };

@@ -1,0 +1,11 @@
+# GENERATED FILE. DO NOT EDIT
+# Edit conan.txt instead
+
+[requires]
+boost/1.71.0@conan/stable
+
+[generators]
+cmake
+
+[options]
+boost:without_python=False
