@@ -43,11 +43,11 @@ namespace mapping {
         template <class T>
         static constexpr bool _tuple_is_valid(const T& tuple) {
             bool result = true;
-            std::apply([&](auto&&... args) {(([](auto& value, const auto& arg) {
-                if constexpr (!is_class_info_t<decltype(arg)>) {
-                    value = false;
+            cu::iterate_tuple(tuple, [&](const auto& val) {
+                if constexpr (!is_class_info_t<decltype(val)>) {
+                    result = false;
                 }
-            } (result, args) ), ...);}, tuple);
+            });
             return result;
         }
 

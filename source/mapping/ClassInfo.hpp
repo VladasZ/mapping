@@ -19,8 +19,8 @@ namespace mapping {
 
         using _FirstPropertyType = cu::first_tuple_type<Properties>;
 
-        static_assert(cu::is_tuple<Properties>::value);
-        static_assert(is_property<_FirstPropertyType>::value);
+        static_assert(cu::is_tuple_v<Properties>);
+        static_assert(is_property_v<_FirstPropertyType>);
 
     public:
 
@@ -49,20 +49,16 @@ namespace mapping {
 
         //MARK: - Tuple Check
 
-        template <class Property>
-        static constexpr void _check(bool& value, const Property&) {
-            if constexpr (is_property<Property>::value) {
-                value = true;
-            }
-            static_assert(std::is_same_v<typename _FirstPropertyType::Class, typename Property::Class>);
-        }
-
         template <class T>
         static constexpr auto _tuple_is_valid(const T& tuple) {
             bool result = false;
-            std::apply([&](auto&&... args) {((
-                    _check(result, args)
-            ), ...);}, tuple);
+            cu::iterate_tuple(tuple, [&](const auto& val) {
+                using Property = std::remove_reference_t<decltype(val)>;
+                if constexpr (is_property_v<Property>) {
+                    result = true;
+                }
+                static_assert(std::is_same_v<typename _FirstPropertyType::Class, typename Property::Class>);
+            });
             return result;
         }
 

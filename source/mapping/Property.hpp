@@ -10,6 +10,8 @@
 
 #include <string>
 
+#include "MetaHelpers.hpp"
+
 namespace mapping {
 
     enum class PropertyType {
@@ -77,5 +79,6 @@ namespace mapping {
 
     template <class                           > struct is_property                    : std::false_type { };
     template <class C, class M, PropertyType t> struct is_property<Property<C, M, t>> : std::true_type  { };
+    template <class T> constexpr bool is_property_v = is_property<cu::remove_all_t<T>>::value;
 
 }
