@@ -45,7 +45,10 @@ namespace mapping {
         static constexpr bool is_float     = std::is_floating_point_v<Value>;
         static constexpr bool is_integer   = std::numeric_limits     <Value>::is_integer;
 
-        static constexpr bool is_base_type   = is_string || is_float || is_integer;
+        static constexpr bool is_vector = cu::is_vector_v<Value>;
+
+        static constexpr bool is_base_type   = is_string || is_float || is_integer || is_vector;
+        static constexpr bool is_array_type  = is_vector;
         static constexpr bool is_custom_type = !is_base_type;
 
         static constexpr bool is_secure = type == PropertyType::Secure;

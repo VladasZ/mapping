@@ -8,6 +8,17 @@
 
 #include "mapping_test.hpp"
 
+class Viha {
+public:
+
+    std::vector<gm::Point> points;
+
+};
+
+MAKE_CLASS_INFO(Viha, std::tuple(
+        MAKE_PROPERTY("points", &Viha::points)
+));
+
 namespace gm {
 
     MAKE_CLASS_INFO(Point, std::tuple(
@@ -30,31 +41,26 @@ namespace gm {
 MAKE_MAPPER(
         gm::InfoOfPoint,
         gm::InfoOfSize,
-        gm::InfoOfRect);
+        gm::InfoOfRect,
+        InfoOfViha
+        );
 
 constexpr auto json_mapper = mapping::JSONMapper<mapper>();
 
 
 int main() {
 
-    mapping::test();
+    Viha vi;
 
-    Log(mapper.to_string());
+    vi.points = { { 1, 2 }, { 3, 4 } };
 
+    auto json_string = json_mapper.to_json(vi);
 
-    gm::Rect rect = { 1, 2, 3, 4 };
+    Logvar(json_string);
 
-    auto rect_json = json_mapper.to_json(rect);
+    auto parsed = json_mapper.parse<Viha>(json_string);
 
-    Logvar(rect_json);
-
-
-    auto parsed_rect = json_mapper.parse<gm::Rect>(rect_json);
-
-    Log(parsed_rect.to_string());
-
-    //Log(json_mapper.to_json(json_mapper.parse<gm::Rect>(json_mapper.to_json(rect))));
-
+    Logvar(json_mapper.to_json(parsed));
 
     return 0;
 }

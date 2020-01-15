@@ -57,7 +57,13 @@ namespace mapping {
                 class_info.iterate_properties([&](const auto& property) {
                     using Property = cu::remove_all_t<decltype(property)>;
                     auto& value = object.*Property::pointer;
-                    if constexpr (Property::is_base_type) {
+                    if constexpr (Property::is_array_type) {
+                        json[property.name()] = nlohmann::json::array();
+                        for (const auto& val : value) {
+                            json[property.name()].push_back(_to_json(val));
+                        }
+                    }
+                    else if constexpr (Property::is_base_type) {
                         json[property.name()] = value;
                     }
                     else {
@@ -88,19 +94,21 @@ namespace mapping {
 
         template <class Member, class Property>
         static void _extract(Member& member, const Property& property, const nlohmann::json& json) {
-            if constexpr (Property::is_custom_type) {
-                Logvar(json.dump());
-                Logvar(member.to_string());
-                auto parsed = _parse<Member>(json);
-                Logvar(parsed.to_string());
-                member = _parse<Member>(json);
-                member = Member { 1, 2 };
-                Logvar(member.to_string());
+
+            nlohmann::json json_value = json[property.name()];
+
+            if constexpr (Property::is_array_type) {
+                for (const auto& val : json_value) {
+                    member.push_back(_parse<typename Member::value_type>(val));
+                }
+            }
+            else if constexpr (Property::is_custom_type) {
+                member = _parse<Member>(json_value);
             }
             else {
 #ifdef __cpp_exceptions
                 try {
-                    member = json.value<Member>(std::string(property.name()), Member { });
+                    member = json_value.get<Member>();
                 }
                 catch (...) {
                     Fatal(std::string() +
