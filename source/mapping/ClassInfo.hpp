@@ -41,13 +41,20 @@ namespace mapping {
 
     public:
 
+        template <class Action>
+        constexpr static void iterate_properties(const Action& action) {
+            cu::iterate_tuple(properties, [&](const auto& property) {
+                action(property);
+            });
+        }
+
         template <auto pointer, class Action>
         static constexpr void get_property(const Action& action) {
             using Pointer = decltype(pointer);
             static_assert(cu::is_pointer_to_member_v<Pointer>);
             using PointerInfo = cu::pointer_to_member_info<Pointer>;
             static_assert(cu::is_same_v<typename PointerInfo::Class, Class>);
-            cu::iterate_tuple(properties, [&](const auto& property) {
+            iterate_properties([&](const auto& property) {
                 using Property = cu::remove_all_t<decltype(property)>;
                 if constexpr (pointer == Property::pointer) {
                     action(property);
@@ -85,7 +92,7 @@ namespace mapping {
 
         std::string to_string() const {
             std::string result = std::string(name) + "\n";
-            cu::iterate_tuple(properties, [&](const auto& prop){
+            iterate_properties([&](const auto& prop){
                 result += prop.to_string() + "\n";
             });
             return result;

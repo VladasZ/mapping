@@ -37,7 +37,7 @@ namespace mapping {
             static Class result;
             result = Class { };
             mapper.template get_class_info<Class>([&](const auto& class_info) {
-                cu::iterate_tuple(class_info.properties, [&](const auto& property) {
+                class_info.iterate_properties([&](const auto& property) {
                     using Property = cu::remove_all_t<decltype(property)>;
                     using Value = typename Property::Value;
                     static constexpr auto pointer = Property::pointer;
@@ -51,7 +51,7 @@ namespace mapping {
         template<class Array>
         static std::string array_to_json(const Array& array) {
             using Class = typename Array::value_type;
-            static_assert(mapper.template exists<Class>());
+            static_assert(_exists<Class>());
             auto result = nlohmann::json::array();
             for (const auto& value : array) {
                 result.push_back(_to_json(value));
@@ -63,12 +63,12 @@ namespace mapping {
 
         template <class Class>
         static nlohmann::json _to_json(const Class& object) {
-            static_assert(mapper.template exists<Class>());
+            static_assert(_exists<Class>());
             nlohmann::json json;
             mapper.template get_class_info<Class>([&](const auto& class_info) {
-                cu::iterate_tuple(class_info.properties, [&](const auto& property) {
+                class_info.iterate_properties([&](const auto& property) {
                     using Property = cu::remove_all_t<decltype(property)>;
-                    json[std::string(property.name)] = object.*Property::pointer;
+                    json[property.name()] = object.*Property::pointer;
                 });
             });
             return json;
@@ -92,7 +92,11 @@ namespace mapping {
 #endif
         }
 
-    };
+        template <class Class>
+        static constexpr bool _exists() {
+            return mapper.template exists<Class>();
+        }
 
+    };
 
 }

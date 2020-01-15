@@ -24,13 +24,16 @@ namespace mapping {
 
     template<auto _pointer, PropertyType type = PropertyType::None>
     class Property : is_property_cheker_base {
-    public:
 
         using Pointer = decltype(_pointer);
 
         static_assert(cu::is_pointer_to_member_v<Pointer>);
 
         using PointerInfo = cu::pointer_to_member_info<Pointer>;
+
+        const std::string_view _name;
+
+    public:
 
         using Class = typename PointerInfo::Class;
         using Value = typename PointerInfo::Value;
@@ -48,12 +51,15 @@ namespace mapping {
 
 
         static inline const auto class_name = cu::class_name<Class>;
-        const std::string_view name;
 
-        constexpr Property(const std::string_view& name) : name(name) {
+        constexpr Property(const std::string_view& name) : _name(name) {
         }
 
-        static constexpr std::string_view database_type_name() {
+        std::string name() const {
+            return std::string(_name);
+        }
+
+        static std::string database_type_name() {
             if constexpr (is_string) {
                 return "TEXT";
             }
@@ -74,7 +80,7 @@ namespace mapping {
 
         std::string to_string() const {
             return std::string() +
-                   "Property: " + std::string(name) + " type: " + std::string(class_name);
+                   "Property: " + name() + " type: " + class_name;
         }
 
     };

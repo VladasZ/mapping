@@ -2,7 +2,7 @@
 #include "Log.hpp"
 #include "Mapper.hpp"
 #include "JsonMapper.hpp"
-#include "TestJsonModels.hpp"
+#include "TestMappingModels.hpp"
 
 class Dog {
 public:
@@ -98,10 +98,7 @@ int main() {
             cat
     };
 
-
     Logvar(json_mapper.array_to_json(arr));
-
-
 
     return 0;
 }

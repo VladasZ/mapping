@@ -2,7 +2,6 @@
 // Created by Vladas Zakrevskis on 03/09/2019.
 //
 
-
 #pragma once
 
 #include <map>
@@ -65,6 +64,7 @@ namespace mapping {
 		static void check_string(const std::string&);
 
     private:
+
         void _check(Type) const;
 
     };

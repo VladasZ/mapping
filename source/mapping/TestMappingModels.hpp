@@ -1,5 +1,5 @@
 //
-//  TestJsonModels.hpp
+//  TestMappingModels.hpp
 //  mapping
 //
 //  Created by Vladas Zakrevskis on 9/01/2020.
@@ -7,6 +7,8 @@
 //
 
 #pragma once
+
+#include "Mapper.hpp"
 
 namespace mapping {
 

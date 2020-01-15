@@ -37,6 +37,7 @@ namespace mapping {
         static std::string create_table_command() {
             std::string command = "CREATE TABLE IF NOT EXISTS ";
 
+
             command += T::class_name();
             command += " (\n";
 
@@ -95,7 +96,7 @@ namespace mapping {
 		}
 
 		static std::string static_select_command_with_id(ID id) {
-            return select_command_with_key_value(sqlite_id_key, id);
+            return "";//select_command_with_key_value(sqlite_id_key, id);
         }
 
 		static std::string select_command_with_key_value(std::string key, Value value) {
