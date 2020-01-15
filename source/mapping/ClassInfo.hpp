@@ -98,5 +98,5 @@ namespace mapping {
 }
 
 #define MAKE_CLASS_INFO(name, properties)\
-constexpr auto properties_of_##name = properties;\
-constexpr auto InfoOf##name = mapping::ClassInfo<properties_of_##name>(#name)
+static constexpr auto properties_of_##name = properties;\
+static constexpr auto InfoOf##name = mapping::ClassInfo<properties_of_##name>(#name)

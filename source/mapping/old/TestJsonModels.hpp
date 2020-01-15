@@ -8,8 +8,6 @@
 
 #pragma once
 
-#include "JSONMappable.hpp"
-
 namespace mapping {
 
     class TestClass {
@@ -22,5 +20,13 @@ namespace mapping {
         uint8_t gage = 130;
 
     };
+
+    MAKE_CLASS_INFO(TestClass,
+                    std::tuple(
+                            MAKE_PROPERTY("age",    &TestClass::age),
+                            MAKE_PROPERTY("page", &TestClass::page),
+                            MAKE_PROPERTY("wage", &TestClass::wage),
+                            MAKE_PROPERTY("gage", &TestClass::gage)
+                    ));
 
 }

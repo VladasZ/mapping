@@ -32,7 +32,7 @@ MAKE_CLASS_INFO(Dog, std::tuple(
         MAKE_PROPERTY("height", &Dog::height)
 ));
 
-MAKE_MAPPER(InfoOfCat, InfoOfDog);
+MAKE_MAPPER(InfoOfCat, InfoOfDog, mapping::InfoOfTestClass);
 
 constexpr auto json_mapper = mapping::JSONMapper<mapper>();
 
@@ -83,6 +83,25 @@ int main() {
     auto cat_parsed = json_mapper.parse<Cat>(json);
 
     Logvar(json_mapper.to_json(cat_parsed));
+
+    cat_parsed.age = 111;
+    cat_parsed.height = 111;
+
+    cat_parsed = json_mapper.parse<Cat>(json_mapper.to_json(cat_parsed));
+
+    Logvar(json_mapper.to_json(cat_parsed));
+
+
+    const std::vector arr = {
+            cat,
+            cat_parsed,
+            cat
+    };
+
+
+    Logvar(json_mapper.array_to_json(arr));
+
+
 
     return 0;
 }
