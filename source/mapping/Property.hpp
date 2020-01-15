@@ -10,6 +10,7 @@
 
 #include <string>
 
+#include "Log.hpp"
 #include "MetaHelpers.hpp"
 
 namespace mapping {
@@ -40,15 +41,15 @@ namespace mapping {
 
         static constexpr auto pointer = _pointer;
 
-        static constexpr bool is_string  = std::is_same_v          <Value, std::string>;
-        static constexpr bool is_float   = std::is_floating_point_v<Value>;
-        static constexpr bool is_integer = std::numeric_limits     <Value>::is_integer;
+        static constexpr bool is_string    = std::is_same_v          <Value, std::string>;
+        static constexpr bool is_float     = std::is_floating_point_v<Value>;
+        static constexpr bool is_integer   = std::numeric_limits     <Value>::is_integer;
+
+        static constexpr bool is_base_type   = is_string || is_float || is_integer;
+        static constexpr bool is_custom_type = !is_base_type;
 
         static constexpr bool is_secure = type == PropertyType::Secure;
         static constexpr bool is_unique = type == PropertyType::Unique;
-
-        static_assert(is_string || is_float || is_integer, "Invalid property type");
-
 
         static inline const auto class_name = cu::class_name<Class>;
 
@@ -70,11 +71,7 @@ namespace mapping {
                 return "INTEGER";
             }
             else {
-#ifdef MICROCONTROLLER_BUILD
-                Fatal("Invalid member type");
-#else
-                Fatal(std::string() + "Invalid member type: " + typeid(Value).name());
-#endif
+                Fatal(std::string() + "Invalid member type: " + cu::class_name<Value>);
             }
         }
 

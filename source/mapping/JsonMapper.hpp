@@ -78,12 +78,12 @@ namespace mapping {
         static void _extract(Member& member, const Property& property, const nlohmann::json& json) {
 #ifdef __cpp_exceptions
             try {
-                member = json.value<Member>(std::string(property.name), Member { });
+                member = json.value<Member>(std::string(property.name()), Member { });
             }
             catch (...) {
                 Fatal(std::string() +
-                      "Invalid json value for key: \"" + std::string(property.name) + "\" of class: " + std::string(property.class_name) + ". " +
-                      "Expected type: " + std::string(property.database_type_name()) + " " +
+                      "Invalid json value for key: \"" + property.name() + "\" of class: " + property.class_name + ". " +
+                      "Expected type: " + property.database_type_name() + " " +
                       "JSON exception: " + what()
                 );
             }

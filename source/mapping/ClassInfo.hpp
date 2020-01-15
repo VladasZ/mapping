@@ -20,6 +20,22 @@ namespace mapping {
     template <auto& _properties>
     class ClassInfo final : is_class_info_cheker_base {
 
+    private:
+
+        template <class T>
+        static constexpr auto _has_custom_type_properties(const T& tuple) {
+            bool result = false;
+            cu::iterate_tuple(tuple, [&](const auto& val) {
+                using Property = std::remove_reference_t<decltype(val)>;
+                if constexpr (Property::is_custom_type) {
+                    result = true;
+                }
+            });
+            return result;
+        }
+
+    private:
+
         using Properties = cu::remove_all_t<decltype(_properties)>;
 
         using _FirstPropertyType = cu::first_tuple_type<Properties>;
@@ -34,6 +50,7 @@ namespace mapping {
         const std::string_view name;
 
         static constexpr auto properties = _properties;
+        static constexpr bool has_custom_properties = _has_custom_type_properties(_properties);
 
         constexpr explicit ClassInfo(const std::string_view name) : name(name) {
             static_assert(_tuple_is_valid(properties));
@@ -46,29 +63,6 @@ namespace mapping {
             cu::iterate_tuple(properties, [&](const auto& property) {
                 action(property);
             });
-        }
-
-        template <auto pointer, class Action>
-        static constexpr void get_property(const Action& action) {
-            using Pointer = decltype(pointer);
-            static_assert(cu::is_pointer_to_member_v<Pointer>);
-            using PointerInfo = cu::pointer_to_member_info<Pointer>;
-            static_assert(cu::is_same_v<typename PointerInfo::Class, Class>);
-            iterate_properties([&](const auto& property) {
-                using Property = cu::remove_all_t<decltype(property)>;
-                if constexpr (pointer == Property::pointer) {
-                    action(property);
-                }
-            });
-        }
-
-        template <auto pointer>
-        static constexpr std::string_view get_property_name() {
-            std::string_view result;
-            get_property<pointer>([&](const auto& property) {
-                result = property.name;
-            });
-            return result;
         }
 
     private:
@@ -92,6 +86,7 @@ namespace mapping {
 
         std::string to_string() const {
             std::string result = std::string(name) + "\n";
+            result += std::string() + "has custom props: " + (has_custom_properties ? "true" : "false") + "\n";
             iterate_properties([&](const auto& prop){
                 result += prop.to_string() + "\n";
             });

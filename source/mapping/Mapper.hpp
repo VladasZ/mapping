@@ -12,6 +12,7 @@
 
 #include "Property.hpp"
 #include "ClassInfo.hpp"
+#include "ArrayUtils.hpp"
 
 namespace mapping {
 
@@ -27,7 +28,7 @@ namespace mapping {
     public:
 
         constexpr explicit Mapper() {
-            static_assert(_tuple_is_valid(classes_info));
+            static_assert(_check_classes_info(classes_info));
         }
 
     public:
@@ -77,14 +78,33 @@ namespace mapping {
         //MARK: - Tuple Check
 
         template <class T>
-        static constexpr bool _tuple_is_valid(const T& tuple) {
-            bool result = true;
-            cu::iterate_tuple(tuple, [&](const auto& val) {
-                if constexpr (!is_class_info_v<decltype(val)>) {
-                    result = false;
+        static constexpr bool _check_classes_info(const T& tuple) {
+            constexpr auto tuple_size = std::tuple_size_v<T>;
+
+            cu::iterate_tuple(tuple, [&](const auto& class_info) {
+
+                using ClassInfo = cu::remove_all_t<decltype(class_info)>;
+                using Class = typename ClassInfo::Class;
+                static_assert(is_class_info_v<ClassInfo>);
+
+                if constexpr (ClassInfo::has_custom_properties) {
+
+                    ClassInfo::iterate_properties([&](const auto& property) {
+
+                        using Property = cu::remove_all_t<decltype(property)>;
+
+                        if constexpr (Property::is_custom_type) {
+                            using Value = typename Property::Value;
+                            static_assert(exists<Value>());
+                        }
+
+                    });
+
                 }
+
             });
-            return result;
+
+            return true;
         }
 
     public:
