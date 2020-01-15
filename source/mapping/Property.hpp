@@ -20,35 +20,40 @@ namespace mapping {
         Unique
     };
 
+    class is_property_cheker_base { };
+
     template<
-            class _Class,
-            class _Member,
+            class _Pointer,
+            _Pointer _pointer,
             PropertyType type = PropertyType::None
     >
-    class Property {
+    class Property : is_property_cheker_base {
     public:
 
-        using Class = _Class;
-        using Member = std::remove_const_t<_Member>;
+        static_assert(cu::is_pointer_to_member_v<_Pointer>);
 
-        using Pointer = _Member Class::*;
+        using Pointer = _Pointer;
+        using PointerInfo = cu::pointer_to_member_info<Pointer>;
 
-        constexpr static bool is_string  = std::is_same_v<Member, std::string>;
-        constexpr static bool is_float   = std::is_floating_point_v<float>;
-        constexpr static bool is_integer = std::numeric_limits<Member>::is_integer;
+        using Class = typename PointerInfo::Class;
+        using Value = typename PointerInfo::Value;
 
-        constexpr static bool is_secure  = type == PropertyType::Secure;
-        constexpr static bool is_unique  = type == PropertyType::Unique;
+        static constexpr auto pointer = _pointer;
+
+        static constexpr bool is_string  = std::is_same_v<Value, std::string>;
+        static constexpr bool is_float   = std::is_floating_point_v<Value>;
+        static constexpr bool is_integer = std::numeric_limits<Value>::is_integer;
+
+        static constexpr bool is_secure = type == PropertyType::Secure;
+        static constexpr bool is_unique = type == PropertyType::Unique;
 
         static_assert(is_string || is_float || is_integer, "Invalid property type");
 
         const std::string_view member_name = database_type_name();
 
         const std::string_view name;
-        const Pointer pointer;
 
-        constexpr Property(const std::string_view& name, Pointer pointer) :
-                name(name), pointer(pointer) {
+        constexpr Property(const std::string_view& name) : name(name) {
         }
 
         constexpr std::string_view database_type_name() const {
@@ -65,7 +70,7 @@ namespace mapping {
 #ifdef MICROCONTROLLER_BUILD
                 Fatal("Invalid member type");
 #else
-                Fatal(std::string() + "Invalid member type: " + typeid(Member).name());
+                Fatal(std::string() + "Invalid member type: " + typeid(Value).name());
 #endif
             }
         }
@@ -77,8 +82,9 @@ namespace mapping {
 
     };
 
-    template <class                           > struct is_property                    : std::false_type { };
-    template <class C, class M, PropertyType t> struct is_property<Property<C, M, t>> : std::true_type  { };
-    template <class T> constexpr bool is_property_v = is_property<cu::remove_all_t<T>>::value;
+    template <class T> constexpr bool is_property_v = std::is_base_of_v<is_property_cheker_base, cu::remove_all_t<T>>;
 
 }
+
+#define MAKE_PROPERTY(name, pointer)\
+mapping::Property<decltype(pointer), pointer>(name)

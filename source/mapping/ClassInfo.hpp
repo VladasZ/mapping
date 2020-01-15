@@ -10,6 +10,7 @@
 
 #include <iostream>
 
+#include "Property.hpp"
 #include "MetaHelpers.hpp"
 
 namespace mapping {
@@ -26,8 +27,6 @@ namespace mapping {
 
     public:
 
-        static constexpr bool is_class_info = true;
-
         using Class = typename _FirstPropertyType::Class;
 
         const std::string_view name;
@@ -36,10 +35,26 @@ namespace mapping {
             static_assert(_tuple_is_valid(properties));
         }
 
-        std::string to_string() const {
-            std::string result = std::string(name) + "\n";
-            cu::iterate_tuple(properties, [&](const auto& prop){
-                result += prop.to_string() + "\n";
+    public:
+
+        template <class Pointer, Pointer pointer, class Action>
+        static constexpr void get_property(const Action& action) {
+            static_assert(cu::is_pointer_to_member_v<Pointer>);
+            using PointerInfo = cu::pointer_to_member_info<Pointer>;
+            static_assert(cu::is_same_v<typename PointerInfo::Class, Class>);
+            cu::iterate_tuple(properties, [&](const auto& property) {
+                using Property = cu::remove_all_t<decltype(property)>;
+                if constexpr (pointer == Property::pointer) {
+                    action(property);
+                }
+            });
+        }
+
+        template <class Pointer, Pointer pointer>
+        static constexpr std::string_view get_property_name() {
+            std::string_view result;
+            get_property<Pointer, pointer>([&](const auto& property) {
+                result = property.name;
             });
             return result;
         }
@@ -57,6 +72,16 @@ namespace mapping {
                     result = true;
                 }
                 static_assert(std::is_same_v<typename _FirstPropertyType::Class, typename Property::Class>);
+            });
+            return result;
+        }
+
+    public:
+
+        std::string to_string() const {
+            std::string result = std::string(name) + "\n";
+            cu::iterate_tuple(properties, [&](const auto& prop){
+                result += prop.to_string() + "\n";
             });
             return result;
         }

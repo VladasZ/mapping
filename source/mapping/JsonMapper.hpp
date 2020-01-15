@@ -48,6 +48,26 @@ namespace mapping {
             return object.*pointer;
         }
 
+        template <class Class, class Action>
+        static constexpr void get_class_info(const Action& action) {
+            static_assert(exists<Class>());
+            cu::iterate_tuple(classes_info, [&] (const auto& info) {
+                using Info = cu::remove_all_t<decltype(info)>;
+                if constexpr (cu::is_same_v<Class, typename Info::Class>) {
+                    action(info);
+                }
+            });
+        }
+
+        template <class Class>
+        static constexpr std::string_view get_class_name() {
+            std::string_view result;
+            get_class_info<Class>([&](const auto& info) {
+                result = info.name;
+            });
+            return result;
+        }
+
     private:
 
         //MARK: - Tuple Check

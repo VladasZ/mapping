@@ -1,11 +1,12 @@
 
 #include "Log.hpp"
-#include "NewMapper.hpp"
+#include "Mapper.hpp"
 #include "TestJsonModels.hpp"
 
 class Dog {
 public:
 
+    int age;
     int height;
 
     static constexpr std::string_view class_name() {
@@ -22,12 +23,12 @@ public:
 };
 
 MAKE_CLASS_INFO(Cat, std::tuple(
-        mapping::Property("age",    &Cat::age   ),
-        mapping::Property("height", &Cat::height)
+        MAKE_PROPERTY("age",    &Cat::age   ),
+        MAKE_PROPERTY("height", &Cat::height)
 ));
 
 MAKE_CLASS_INFO(Dog, std::tuple(
-        mapping::Property("height", &Dog::height)
+        MAKE_PROPERTY("height", &Dog::height)
 ));
 
 MAKE_MAPPER(InfoOfCat, InfoOfDog);
@@ -35,7 +36,10 @@ MAKE_MAPPER(InfoOfCat, InfoOfDog);
 
 constexpr auto has_cats = mapper.exists<Cat>();
 
+
+
 int main() {
+
 
 
     constexpr Cat cat { };
@@ -51,8 +55,24 @@ int main() {
 
     Logvar(mapper.exists<Cat>());
 
+    mapper.get_class_info<Cat>([&](const auto& info) {
+        Logvar(info.to_string());
+        Log("Speeess");
+    });
 
 
+    Logvar(mapper.get_class_name<Cat>());
+
+    static_assert(mapper.get_class_name<Cat>() == "Cat");
+
+    InfoOfCat.get_property<decltype(&Cat::age), &Cat::age>([&](const auto& property) {
+        Logvar(property.name);
+    });
+
+   constexpr auto name = InfoOfCat.get_property_name<decltype(&Cat::age), &Cat::age>();
+
+
+    static_assert(name == "age");
 
     return 0;
 }

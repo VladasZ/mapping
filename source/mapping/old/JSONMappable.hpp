@@ -47,7 +47,7 @@ namespace mapping {
 				);
 			}
 #else
-            member = json.value<Member>(std::string(property.name), Member { });
+            member = json.value<Value>(std::string(property.name), Value { });
 #endif
         }
 
