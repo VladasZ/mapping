@@ -1,102 +1,81 @@
 //
-//  NewMapper.hpp
+//  JsonMapper.hpp
 //  mapping
 //
-//  Created by Vladas Zakrevskis on 24/12/2019.
-//  Copyright © 2019 VladasZ. All rights reserved.
+//  Created by Vladas Zakrevskis on 15/01/2020.
+//  Copyright © 2020 VladasZ. All rights reserved.
 //
 
 #pragma once
 
 #include <iostream>
 
-#include "Property.hpp"
-#include "ClassInfo.hpp"
+#include "json.hpp"
+
+#include "Mapper.hpp"
+#include "ExceptionCatch.hpp"
 
 namespace mapping {
 
-    template <class ClassesInfo, ClassesInfo& classes_info>
-    class Mapper {
+    template <auto& mapper>
+    class JSONMapper {
 
-        static_assert(cu::is_tuple<cu::remove_all_t<ClassesInfo>>::value);
+        using Mapper = cu::remove_all_t<decltype(mapper)>;
 
-    public:
-
-        constexpr explicit Mapper() {
-            static_assert(_tuple_is_valid(classes_info));
-        }
+        static_assert(is_mapper_v<Mapper>);
 
     public:
 
         template <class Class>
-        static constexpr bool exists() {
-            bool result = false;
-            cu::iterate_tuple(classes_info, [&](const auto& val) {
-                using Info = cu::remove_all_t<decltype(val)>;
-                if constexpr (cu::is_same_v<Class, typename Info::Class>) {
-                    result = true;
-                }
+        static std::string to_json(const Class& object) {
+            static_assert(mapper.template exists<Class>());
+            nlohmann::json json;
+            mapper.template get_class_info<Class>([&](const auto& class_info) {
+                cu::iterate_tuple(class_info.properties, [&](const auto& property) {
+                    json[std::string(property.name)] = object.*property.pointer;
+                });
             });
-            return result;
-        }
-
-        template <class Class, class Pointer, class PointerInfo = cu::pointer_to_member_info<Pointer>>
-        static constexpr auto& get(Class& object, const Pointer& pointer) {
-            static_assert(exists<Class>());
-            static_assert(cu::is_pointer_to_member_v<Pointer>);
-            static_assert(cu::is_same_v<typename PointerInfo::Class, Class>);
-            return object.*pointer;
-        }
-
-        template <class Class, class Action>
-        static constexpr void get_class_info(const Action& action) {
-            static_assert(exists<Class>());
-            cu::iterate_tuple(classes_info, [&] (const auto& info) {
-                using Info = cu::remove_all_t<decltype(info)>;
-                if constexpr (cu::is_same_v<Class, typename Info::Class>) {
-                    action(info);
-                }
-            });
+            return json.dump();
         }
 
         template <class Class>
-        static constexpr std::string_view get_class_name() {
-            std::string_view result;
-            get_class_info<Class>([&](const auto& info) {
-                result = info.name;
+        static Class parse(const std::string& json_string) {
+            auto json = nlohmann::json::parse(json_string, nullptr, false);
+            Class result;
+            mapper.template get_class_info<Class>([&](const auto& class_info) {
+                cu::iterate_tuple(class_info.properties, [&](const auto& property) {
+                    using Property = cu::remove_all_t<decltype(property)>;
+                    using Value = typename Property::Value;
+                    constexpr auto pointer = Property::pointer;
+                    auto& value = mapper.get(result, pointer);
+                 //   mapper.get(result, pointer) = json.value(std::string(property.name), Value { });
+                    _extract(value, property, json);
+                });
             });
             return result;
         }
 
     private:
 
-        //MARK: - Tuple Check
-
-        template <class T>
-        static constexpr bool _tuple_is_valid(const T& tuple) {
-            bool result = true;
-            cu::iterate_tuple(tuple, [&](const auto& val) {
-                if constexpr (!is_class_info_t<decltype(val)>) {
-                    result = false;
-                }
-            });
-            return result;
-        }
-
-    public:
-
-        std::string to_string() const {
-            std::string result;
-            cu::iterate_tuple(classes_info, [&](const auto& info) {
-                result += info.to_string() + "\n";
-            });
-            return result;
+        template <class Member, class Property>
+        static void _extract(Member& member, const Property& property, const nlohmann::json& json) {
+#ifdef __cpp_exceptions
+            try {
+                member = json.value<Member>(std::string(property.name), Member { });
+            }
+            catch (...) {
+                Fatal(std::string() +
+                      "Invalid json value for key: \"" + std::string(property.name) + "\" of class: " + std::string(property.class_name) + ". " +
+                      "Expected type: " + std::string(property.database_type_name()) + " " +
+                      "JSON exception: " + what()
+                );
+            }
+#else
+            member = json.value<Value>(std::string(property.name), Value { });
+#endif
         }
 
     };
 
-}
 
-#define MAKE_MAPPER(...)\
-constexpr auto mapper_classes = std::make_tuple(__VA_ARGS__);\
-constexpr auto mapper = mapping::Mapper<decltype(mapper_classes), mapper_classes>();
+}

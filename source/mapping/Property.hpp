@@ -37,23 +37,23 @@ namespace mapping {
 
         static constexpr auto pointer = _pointer;
 
-        static constexpr bool is_string  = std::is_same_v<Value, std::string>;
+        static constexpr bool is_string  = std::is_same_v          <Value, std::string>;
         static constexpr bool is_float   = std::is_floating_point_v<Value>;
-        static constexpr bool is_integer = std::numeric_limits<Value>::is_integer;
+        static constexpr bool is_integer = std::numeric_limits     <Value>::is_integer;
 
         static constexpr bool is_secure = type == PropertyType::Secure;
         static constexpr bool is_unique = type == PropertyType::Unique;
 
         static_assert(is_string || is_float || is_integer, "Invalid property type");
 
-        const std::string_view member_name = database_type_name();
 
+        static inline const auto class_name = cu::class_name<Class>;
         const std::string_view name;
 
         constexpr Property(const std::string_view& name) : name(name) {
         }
 
-        constexpr std::string_view database_type_name() const {
+        static constexpr std::string_view database_type_name() {
             if constexpr (is_string) {
                 return "TEXT";
             }
@@ -74,7 +74,7 @@ namespace mapping {
 
         std::string to_string() const {
             return std::string() +
-                   "Property: " + std::string(name) + " type: " + std::string(member_name);
+                   "Property: " + std::string(name) + " type: " + std::string(class_name);
         }
 
     };

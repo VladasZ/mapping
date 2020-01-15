@@ -1,6 +1,7 @@
 
 #include "Log.hpp"
 #include "Mapper.hpp"
+#include "JsonMapper.hpp"
 #include "TestJsonModels.hpp"
 
 class Dog {
@@ -33,6 +34,7 @@ MAKE_CLASS_INFO(Dog, std::tuple(
 
 MAKE_MAPPER(InfoOfCat, InfoOfDog);
 
+constexpr auto json_mapper = mapping::JSONMapper<mapper>();
 
 constexpr auto has_cats = mapper.exists<Cat>();
 
@@ -73,6 +75,14 @@ int main() {
 
 
     static_assert(name == "age");
+
+    auto json = json_mapper.to_json(cat);
+
+    Logvar(json);
+
+    auto cat_parsed = json_mapper.parse<Cat>(json);
+
+    Logvar(json_mapper.to_json(cat_parsed));
 
     return 0;
 }

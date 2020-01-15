@@ -17,10 +17,10 @@ namespace mapping {
 
     class is_class_info_cheker_base { };
 
-    template <auto& properties>
+    template <auto& _properties>
     class ClassInfo final : is_class_info_cheker_base {
 
-        using Properties = cu::remove_all_t<decltype(properties)>;
+        using Properties = cu::remove_all_t<decltype(_properties)>;
 
         using _FirstPropertyType = cu::first_tuple_type<Properties>;
 
@@ -32,6 +32,8 @@ namespace mapping {
         using Class = typename _FirstPropertyType::Class;
 
         const std::string_view name;
+
+        static constexpr auto properties = _properties;
 
         constexpr explicit ClassInfo(const std::string_view name) : name(name) {
             static_assert(_tuple_is_valid(properties));
@@ -91,7 +93,7 @@ namespace mapping {
 
     };
 
-    template <class T> constexpr bool is_class_info_t = std::is_base_of_v<is_class_info_cheker_base, cu::remove_all_t<T>>;
+    template <class T> constexpr bool is_class_info_v = std::is_base_of_v<is_class_info_cheker_base, cu::remove_all_t<T>>;
 
 }
 

@@ -15,8 +15,10 @@
 
 namespace mapping {
 
+    class is_mapper_cheker_base { };
+
     template <auto& classes_info>
-    class Mapper {
+    class Mapper : is_mapper_cheker_base {
 
         using ClassesInfo = cu::remove_all_t<decltype(classes_info)>;
 
@@ -78,7 +80,7 @@ namespace mapping {
         static constexpr bool _tuple_is_valid(const T& tuple) {
             bool result = true;
             cu::iterate_tuple(tuple, [&](const auto& val) {
-                if constexpr (!is_class_info_t<decltype(val)>) {
+                if constexpr (!is_class_info_v<decltype(val)>) {
                     result = false;
                 }
             });
@@ -96,6 +98,8 @@ namespace mapping {
         }
 
     };
+
+    template <class T> constexpr bool is_mapper_v = std::is_base_of_v<is_mapper_cheker_base, cu::remove_all_t<T>>;
 
 }
 
