@@ -36,8 +36,10 @@ namespace mapping {
 
     public:
 
-        using Class = typename PointerInfo::Class;
-        using Value = typename PointerInfo::Value;
+        static constexpr auto is_pointer = std::is_pointer_v<typename PointerInfo::Value>;
+
+        using Class =                       typename PointerInfo::Class;
+        using Value = std::remove_pointer_t<typename PointerInfo::Value>;
 
         static constexpr auto pointer = _pointer;
 

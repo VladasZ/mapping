@@ -11,14 +11,19 @@
 class Viha {
 public:
 
+    std::vector<std::string> strings;
     std::vector<int> numbers;
     std::vector<gm::Point> points;
+
+    int* int_pointer = nullptr;
 
 };
 
 MAKE_CLASS_INFO(Viha, std::tuple(
+        MAKE_PROPERTY("strings", &Viha::strings),
         MAKE_PROPERTY("numbers", &Viha::numbers),
-        MAKE_PROPERTY("points", &Viha::points)
+        MAKE_PROPERTY("points",  &Viha::points),
+        MAKE_PROPERTY("int_pointer",  &Viha::int_pointer)
 ));
 
 namespace gm {
@@ -56,6 +61,8 @@ int main() {
 
     vi.numbers = { 1, 2, 3, 4 };
     vi.points = { { 1, 2 }, { 3, 4 } };
+    vi.strings = { "a", "b", "c" };
+    vi.int_pointer = new int(111);
 
     auto json_string = json_mapper.to_json(vi);
 

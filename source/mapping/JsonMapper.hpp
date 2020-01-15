@@ -72,7 +72,17 @@ namespace mapping {
                         }
                     }
                     else if constexpr (Property::is_base_type) {
-                        json[property.name()] = value;
+                        if constexpr (Property::is_pointer) {
+                            if (value == nullptr) {
+                                json[property.name()] = nlohmann::json();
+                            }
+                            else {
+                                json[property.name()] = *value;
+                            }
+                        }
+                        else {
+                            json[property.name()] = value;
+                        }
                     }
                     else {
                         json[property.name()] = _to_json(value);
@@ -124,7 +134,13 @@ namespace mapping {
             else {
 #ifdef __cpp_exceptions
                 try {
-                    member = json_value.get<Member>();
+                    if constexpr (Property::is_pointer) {
+                        using CleanMember = std::remove_pointer_t<Member>;
+                        member = new CleanMember(json_value.get<CleanMember>());
+                    }
+                    else {
+                        member = json_value.get<Member>();
+                    }
                 }
                 catch (...) {
                     Fatal(std::string() +
