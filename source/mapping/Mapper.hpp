@@ -15,10 +15,12 @@
 
 namespace mapping {
 
-    template <class ClassesInfo, ClassesInfo& classes_info>
+    template <auto& classes_info>
     class Mapper {
 
-        static_assert(cu::is_tuple<cu::remove_all_t<ClassesInfo>>::value);
+        using ClassesInfo = cu::remove_all_t<decltype(classes_info)>;
+
+        static_assert(cu::is_tuple_v<ClassesInfo>);
 
     public:
 
@@ -99,4 +101,4 @@ namespace mapping {
 
 #define MAKE_MAPPER(...)\
 constexpr auto mapper_classes = std::make_tuple(__VA_ARGS__);\
-constexpr auto mapper = mapping::Mapper<decltype(mapper_classes), mapper_classes>();
+constexpr auto mapper = mapping::Mapper<mapper_classes>();

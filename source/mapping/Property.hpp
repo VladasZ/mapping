@@ -22,17 +22,14 @@ namespace mapping {
 
     class is_property_cheker_base { };
 
-    template<
-            class _Pointer,
-            _Pointer _pointer,
-            PropertyType type = PropertyType::None
-    >
+    template<auto _pointer, PropertyType type = PropertyType::None>
     class Property : is_property_cheker_base {
     public:
 
-        static_assert(cu::is_pointer_to_member_v<_Pointer>);
+        using Pointer = decltype(_pointer);
 
-        using Pointer = _Pointer;
+        static_assert(cu::is_pointer_to_member_v<Pointer>);
+
         using PointerInfo = cu::pointer_to_member_info<Pointer>;
 
         using Class = typename PointerInfo::Class;
@@ -86,5 +83,4 @@ namespace mapping {
 
 }
 
-#define MAKE_PROPERTY(name, pointer)\
-mapping::Property<decltype(pointer), pointer>(name)
+#define MAKE_PROPERTY(name, pointer) mapping::Property<pointer>(name)

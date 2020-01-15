@@ -65,11 +65,11 @@ int main() {
 
     static_assert(mapper.get_class_name<Cat>() == "Cat");
 
-    InfoOfCat.get_property<decltype(&Cat::age), &Cat::age>([&](const auto& property) {
+    InfoOfCat.get_property<&Cat::age>([&](const auto& property) {
         Logvar(property.name);
     });
 
-   constexpr auto name = InfoOfCat.get_property_name<decltype(&Cat::age), &Cat::age>();
+   constexpr auto name = InfoOfCat.get_property_name<&Cat::age>();
 
 
     static_assert(name == "age");

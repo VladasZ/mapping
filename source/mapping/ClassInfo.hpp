@@ -17,8 +17,10 @@ namespace mapping {
 
     class is_class_info_cheker_base { };
 
-    template <class Properties, Properties& properties>
+    template <auto& properties>
     class ClassInfo final : is_class_info_cheker_base {
+
+        using Properties = cu::remove_all_t<decltype(properties)>;
 
         using _FirstPropertyType = cu::first_tuple_type<Properties>;
 
@@ -37,8 +39,9 @@ namespace mapping {
 
     public:
 
-        template <class Pointer, Pointer pointer, class Action>
+        template <auto pointer, class Action>
         static constexpr void get_property(const Action& action) {
+            using Pointer = decltype(pointer);
             static_assert(cu::is_pointer_to_member_v<Pointer>);
             using PointerInfo = cu::pointer_to_member_info<Pointer>;
             static_assert(cu::is_same_v<typename PointerInfo::Class, Class>);
@@ -50,10 +53,10 @@ namespace mapping {
             });
         }
 
-        template <class Pointer, Pointer pointer>
+        template <auto pointer>
         static constexpr std::string_view get_property_name() {
             std::string_view result;
-            get_property<Pointer, pointer>([&](const auto& property) {
+            get_property<pointer>([&](const auto& property) {
                 result = property.name;
             });
             return result;
@@ -94,4 +97,4 @@ namespace mapping {
 
 #define MAKE_CLASS_INFO(name, properties)\
 constexpr auto properties_of_##name = properties;\
-constexpr auto InfoOf##name = mapping::ClassInfo<decltype(properties_of_##name), properties_of_##name>(#name)
+constexpr auto InfoOf##name = mapping::ClassInfo<properties_of_##name>(#name)
