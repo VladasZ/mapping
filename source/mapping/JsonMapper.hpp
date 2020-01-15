@@ -28,11 +28,13 @@ namespace mapping {
 
         template <class Class>
         static Class parse(const std::string& json_string) {
+            static_assert(_exists<Class>());
             return _parse<Class>(nlohmann::json::parse(json_string, nullptr, false));
         }
 
         template <class Class>
         static std::string to_json(const Class& object) {
+            static_assert(_exists<Class>());
             return _to_json(object).dump();
         }
 
@@ -58,9 +60,15 @@ namespace mapping {
                     using Property = cu::remove_all_t<decltype(property)>;
                     auto& value = object.*Property::pointer;
                     if constexpr (Property::is_array_type) {
+                        using ArrayValue = typename Property::Value::value_type;
                         json[property.name()] = nlohmann::json::array();
                         for (const auto& val : value) {
-                            json[property.name()].push_back(_to_json(val));
+                            if constexpr (_exists<ArrayValue>()) {
+                                json[property.name()].push_back(_to_json(val));
+                            }
+                            else {
+                                json[property.name()].push_back(val);
+                            }
                         }
                     }
                     else if constexpr (Property::is_base_type) {
@@ -98,8 +106,16 @@ namespace mapping {
             nlohmann::json json_value = json[property.name()];
 
             if constexpr (Property::is_array_type) {
+
+                using ArrayValue = typename Property::Value::value_type;
+
                 for (const auto& val : json_value) {
-                    member.push_back(_parse<typename Member::value_type>(val));
+                    if constexpr (_exists<ArrayValue>()) {
+                        member.push_back(_parse<typename Member::value_type>(val));
+                    }
+                    else {
+                        member.push_back(val.get<ArrayValue>());
+                    }
                 }
             }
             else if constexpr (Property::is_custom_type) {

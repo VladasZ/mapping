@@ -11,11 +11,13 @@
 class Viha {
 public:
 
+    std::vector<int> numbers;
     std::vector<gm::Point> points;
 
 };
 
 MAKE_CLASS_INFO(Viha, std::tuple(
+        MAKE_PROPERTY("numbers", &Viha::numbers),
         MAKE_PROPERTY("points", &Viha::points)
 ));
 
@@ -52,6 +54,7 @@ int main() {
 
     Viha vi;
 
+    vi.numbers = { 1, 2, 3, 4 };
     vi.points = { { 1, 2 }, { 3, 4 } };
 
     auto json_string = json_mapper.to_json(vi);
