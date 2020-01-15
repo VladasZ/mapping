@@ -28,22 +28,24 @@ namespace mapping {
 
     public:
 
-        template <class T>
-        constexpr bool exists() const {
+        template <class Class>
+        static constexpr bool exists() {
             bool result = false;
             cu::iterate_tuple(classes_info, [&](const auto& val) {
                 using Info = cu::remove_all_t<decltype(val)>;
-                if constexpr (std::is_same_v<T, typename Info::Class>) {
+                if constexpr (cu::is_same_v<Class, typename Info::Class>) {
                     result = true;
                 }
             });
             return result;
         }
 
-        template <class T>
-        constexpr bool get() const {
-            static_assert(exists<T>());
-            return false;
+        template <class Class, class Pointer, class PointerInfo = cu::pointer_to_member_info<Pointer>>
+        static constexpr auto& get(Class& object, const Pointer& pointer) {
+            static_assert(exists<Class>());
+            static_assert(cu::is_pointer_to_member_v<Pointer>);
+            static_assert(cu::is_same_v<typename PointerInfo::Class, Class>);
+            return object.*pointer;
         }
 
     private:

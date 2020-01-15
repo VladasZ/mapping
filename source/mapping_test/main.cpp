@@ -16,8 +16,8 @@ public:
 class Cat {
 public:
 
-    int age;
-    int height;
+    int age    = -1;
+    int height = -1;
 
 };
 
@@ -38,9 +38,20 @@ constexpr auto has_cats = mapper.exists<Cat>();
 int main() {
 
 
+    constexpr Cat cat { };
+
+    Cat mutable_cat;
+
+    mapper.get(mutable_cat, &Cat::age) = 111;
+    Log(mapper.get(mutable_cat, &Cat::age));
+
+    static_assert(mapper.get(cat, &Cat::age) == -1);
+
     Logvar(mapper.to_string());
 
     Logvar(mapper.exists<Cat>());
+
+
 
 
     return 0;
