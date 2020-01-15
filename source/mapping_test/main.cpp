@@ -32,12 +32,28 @@ MAKE_MAPPER(
         gm::InfoOfSize,
         gm::InfoOfRect);
 
+constexpr auto json_mapper = mapping::JSONMapper<mapper>();
+
 
 int main() {
 
     mapping::test();
 
     Log(mapper.to_string());
+
+
+    gm::Rect rect = { 1, 2, 3, 4 };
+
+    auto rect_json = json_mapper.to_json(rect);
+
+    Logvar(rect_json);
+
+
+    auto parsed_rect = json_mapper.parse<gm::Rect>(rect_json);
+
+    Log(parsed_rect.to_string());
+
+    //Log(json_mapper.to_json(json_mapper.parse<gm::Rect>(json_mapper.to_json(rect))));
 
 
     return 0;
