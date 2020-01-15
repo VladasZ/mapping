@@ -21,23 +21,19 @@ public:
 
 };
 
-constexpr auto CatsInfo = mapping::ClassInfo(
-        "Cat",
-        std::tuple(
-                mapping::Property("age",    &Cat::age   ),
-                mapping::Property("height", &Cat::height)
-        ));
+MAKE_CLASS_INFO(Cat, std::tuple(
+        mapping::Property("age",    &Cat::age   ),
+        mapping::Property("height", &Cat::height)
+));
 
-constexpr auto DogsInfo = mapping::ClassInfo(
-        "Dog",
-        std::tuple(
-                mapping::Property("height", &Dog::height)
-        ));
+MAKE_CLASS_INFO(Dog, std::tuple(
+        mapping::Property("height", &Dog::height)
+));
 
-constexpr auto mapper = mapping::Mapper(std::make_tuple(CatsInfo, DogsInfo));
+MAKE_MAPPER(InfoOfCat, InfoOfDog);
 
 
-//constexpr auto has_cats = mapper.exists<Cat>();
+constexpr auto has_cats = mapper.exists<Cat>();
 
 int main() {
 

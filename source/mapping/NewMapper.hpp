@@ -15,17 +15,15 @@
 
 namespace mapping {
 
-    template <class ClassesInfo>
+    template <class ClassesInfo, ClassesInfo& classes_info>
     class Mapper {
 
-        static_assert(cu::is_tuple<ClassesInfo>::value);
+        static_assert(cu::is_tuple<cu::remove_all_t<ClassesInfo>>::value);
 
     public:
 
-        const ClassesInfo classes_info;
-
-        constexpr Mapper(const ClassesInfo info) : classes_info(info) {
-            static_assert(_tuple_is_valid(info));
+        constexpr explicit Mapper() {
+            static_assert(_tuple_is_valid(classes_info));
         }
 
     public:
@@ -76,3 +74,7 @@ namespace mapping {
     };
 
 }
+
+#define MAKE_MAPPER(...)\
+constexpr auto mapper_classes = std::make_tuple(__VA_ARGS__);\
+constexpr auto mapper = mapping::Mapper<decltype(mapper_classes), mapper_classes>();

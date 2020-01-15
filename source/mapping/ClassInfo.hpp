@@ -14,8 +14,10 @@
 
 namespace mapping {
 
-    template <class Properties>
-    class ClassInfo {
+    class is_class_info_cheker_base { };
+
+    template <class Properties, Properties& properties>
+    class ClassInfo final : is_class_info_cheker_base {
 
         using _FirstPropertyType = cu::first_tuple_type<Properties>;
 
@@ -29,12 +31,9 @@ namespace mapping {
         using Class = typename _FirstPropertyType::Class;
 
         const std::string_view name;
-        const Properties properties;
 
-        const int spes = 12;
-
-        constexpr ClassInfo(const std::string_view name, const Properties props) : name(name), properties(props) {
-            static_assert(_tuple_is_valid(props));
+        constexpr explicit ClassInfo(const std::string_view name) : name(name) {
+            static_assert(_tuple_is_valid(properties));
         }
 
         std::string to_string() const {
@@ -64,8 +63,10 @@ namespace mapping {
 
     };
 
-    template <class  > struct is_class_info               : std::false_type { };
-    template <class T> struct is_class_info<ClassInfo<T>> : std::true_type  { };
-    template <class T> constexpr bool is_class_info_t = is_class_info<cu::remove_all_t<T>>::value;
+    template <class T> constexpr bool is_class_info_t = std::is_base_of_v<is_class_info_cheker_base, cu::remove_all_t<T>>;
 
 }
+
+#define MAKE_CLASS_INFO(name, properties)\
+constexpr auto properties_of_##name = properties;\
+constexpr auto InfoOf##name = mapping::ClassInfo<decltype(properties_of_##name), properties_of_##name>(#name)
