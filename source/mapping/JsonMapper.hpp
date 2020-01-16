@@ -121,8 +121,11 @@ namespace mapping {
 
             nlohmann::json json_value = json[property.name()];
 
+            Log(json_value.dump());
+
             if constexpr (Property::Info::is_array_type) {
                 using ArrayValue = typename Property::Value::value_type;
+
                 for (const auto& val : json_value) {
                     if constexpr (_exists<ArrayValue>()) {
                         member.push_back(_parse<typename Member::value_type>(val));

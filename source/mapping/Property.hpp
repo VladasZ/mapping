@@ -26,12 +26,13 @@ namespace mapping {
     template<auto _pointer_to_member, PropertyType type = PropertyType::None>
     class Property : is_property_cheker_base {
 
-
         const std::string_view _name;
 
     public:
 
         using Pointer = decltype(_pointer_to_member);
+
+        static constexpr auto pointer_to_member = _pointer_to_member;
 
         static_assert(cu::is_pointer_to_member_v<Pointer>);
 
@@ -40,22 +41,10 @@ namespace mapping {
         using Class =                       typename PointerInfo::Class;
         using Value = std::remove_pointer_t<typename PointerInfo::Value>;
 
-        static constexpr auto pointer_to_member = _pointer_to_member;
-
         using Info = cu::TypeInfo<typename PointerInfo::Value>;
 
         static constexpr bool is_secure = type == PropertyType::Secure;
         static constexpr bool is_unique = type == PropertyType::Unique;
-
-        static constexpr bool is_array_of_custom_types = [] {
-            if constexpr (Info::is_array_type) {
-
-                return true;
-            }
-            else {
-                return false;
-            }
-        }();
 
         static constexpr bool is_valid = [] {
             if constexpr (Info::is_pointer) {
@@ -77,7 +66,10 @@ namespace mapping {
         template <class T>
         static constexpr auto& get_value(T& object) {
             static_assert(cu::is_same_v<T, Class>);
-            if constexpr (Info::is_pointer) {
+            if constexpr (std::is_pointer_v<T>) {
+                return get_value(*object);
+            }
+            else if constexpr (Info::is_pointer) {
                 return *(object.*pointer_to_member);
             }
             else {
@@ -88,7 +80,12 @@ namespace mapping {
         template <class T>
         static constexpr auto& get_reference(T& object) {
             static_assert(cu::is_same_v<T, Class>);
-            return object.*pointer_to_member;
+            if constexpr (std::is_pointer_v<T>) {
+                return get_reference(*object);
+            }
+            else {
+                return object.*pointer_to_member;
+            }
         }
 
         std::string name() const {
@@ -117,7 +114,7 @@ namespace mapping {
                    ", of class: " + class_name + "\n" +
                    ", is pointer: " + (Info::is_pointer ? "true" : "false") + "\n" +
                    ", is array: " + (Info::is_array_type ? "true" : "false") + "\n" +
-                   ", is array of custom types: " + (is_array_of_custom_types ? "true" : "false")
+                   ", is array of custom types: " + (Info::is_array_of_custom_types ? "true" : "false")
                    ;
         }
 
