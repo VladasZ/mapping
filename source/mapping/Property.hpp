@@ -56,6 +56,17 @@ namespace mapping {
         static constexpr bool is_secure = type == PropertyType::Secure;
         static constexpr bool is_unique = type == PropertyType::Unique;
 
+        static constexpr bool is_valid = [](){
+            if constexpr (is_pointer) {
+                return is_custom_type;
+            }
+            else {
+                return true;
+            }
+        }();
+
+        static_assert(is_valid);
+
         static inline const auto class_name = cu::class_name<Class>;
 
         constexpr Property(const std::string_view& name) : _name(name) {

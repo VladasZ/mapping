@@ -14,16 +14,12 @@ public:
     std::vector<std::string> strings;
     std::vector<int> numbers;
     std::vector<gm::Point> points;
-
-    int* int_pointer = nullptr;
-
 };
 
 MAKE_CLASS_INFO(Viha, std::tuple(
         MAKE_PROPERTY("strings", &Viha::strings),
         MAKE_PROPERTY("numbers", &Viha::numbers),
-        MAKE_PROPERTY("points",  &Viha::points),
-        MAKE_PROPERTY("int_pointer",  &Viha::int_pointer)
+        MAKE_PROPERTY("points",  &Viha::points)
 ));
 
 namespace gm {
@@ -50,7 +46,7 @@ MAKE_MAPPER(
         gm::InfoOfSize,
         gm::InfoOfRect,
         InfoOfViha
-        );
+);
 
 constexpr auto json_mapper = mapping::JSONMapper<mapper>();
 
@@ -62,15 +58,8 @@ int main() {
     vi.numbers = { 1, 2, 3, 4 };
     vi.points = { { 1, 2 }, { 3, 4 } };
     vi.strings = { "a", "b", "c" };
-    vi.int_pointer = new int(111);
 
-    auto json_string = json_mapper.to_json(vi);
-
-    Logvar(json_string);
-
-    auto parsed = json_mapper.parse<Viha>(json_string);
-
-    Logvar(json_mapper.to_json(parsed));
+    json_mapper.test(vi);
 
     return 0;
 }
