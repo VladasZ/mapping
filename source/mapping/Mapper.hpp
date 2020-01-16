@@ -73,6 +73,20 @@ namespace mapping {
             return result;
         }
 
+        template <class Class>
+        static constexpr bool is_equals(const Class& a, const Class& b) {
+            static_assert(exists<Class>());
+            bool result = true;
+            get_class_info<Class>([&](const auto& class_info) {
+                class_info.iterate_properties([&](const auto& property) {
+                    if (a.*property.pointer != b.*property.pointer) {
+                        result = false;
+                    }
+                });
+            });
+            return result;
+        }
+
     private:
 
         //MARK: - Tuple Check

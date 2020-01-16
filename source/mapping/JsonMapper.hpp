@@ -27,6 +27,16 @@ namespace mapping {
     public:
 
         template <class Class>
+        static void test(const Class& object) {
+            auto json = to_json(object);
+            Log(json);
+            auto parsed_object = parse<Class>(json);
+            auto new_json = to_json(parsed_object);
+            Log(new_json);
+            assert(json == new_json);
+        }
+
+        template <class Class>
         static Class parse(const std::string& json_string) {
             static_assert(_exists<Class>());
             return _parse<Class>(nlohmann::json::parse(json_string, nullptr, false));
