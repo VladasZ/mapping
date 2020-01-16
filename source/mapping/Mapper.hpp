@@ -81,11 +81,11 @@ namespace mapping {
                     using Property = cu::remove_all_t<decltype(property)>;
                     using Value = typename Property::Value;
                     auto& reference = property.get_reference(result);
-                    if constexpr (Property::is_base_type) {
-                        reference = Value { };
+                    if constexpr (Property::Info::is_pointer) {
+                        reference = new Value { };
                     }
                     else {
-                        reference = new Value { };
+                        reference = Value { };
                     }
                 });
             });
@@ -135,7 +135,7 @@ namespace mapping {
 
                         using Property = cu::remove_all_t<decltype(property)>;
 
-                        if constexpr (Property::is_custom_type) {
+                        if constexpr (Property::Info::is_custom_type) {
                             using Value = typename Property::Value;
                             static_assert(exists<Value>());
                         }

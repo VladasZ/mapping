@@ -31,7 +31,6 @@ namespace mapping {
             auto json = to_json(object);
             Log(json);
             auto parsed_object = parse<Class>(json);
-            Logvar(parsed_object.to_string());
             auto new_json = to_json(parsed_object);
             Log(new_json);
             assert(json == new_json);
@@ -70,8 +69,7 @@ namespace mapping {
                 class_info.iterate_properties([&](const auto& property) {
                     using Property = cu::remove_all_t<decltype(property)>;
                     const auto& value = Property::get_value(object);
-                    //   object.*Property::pointer;
-                    if constexpr (Property::is_array_type) {
+                    if constexpr (Property::Info::is_array_type) {
                         using ArrayValue = typename Property::Value::value_type;
                         json[property.name()] = nlohmann::json::array();
                         for (const auto& val : value) {
@@ -83,8 +81,8 @@ namespace mapping {
                             }
                         }
                     }
-                    else if constexpr (Property::is_base_type) {
-                        if constexpr (Property::is_pointer) {
+                    else if constexpr (Property::Info::is_base_type) {
+                        if constexpr (Property::Info::is_pointer) {
                             if (value == nullptr) {
                                 json[property.name()] = nlohmann::json();
                             }
@@ -108,16 +106,10 @@ namespace mapping {
         template <class Class>
         static Class _parse(const nlohmann::json& json) {
             static_assert(_exists<Class>());
-            static Class result;
-            result = Class { };
+            Class result = mapper.template create_empty<Class>();
             mapper.template get_class_info<Class>([&](const auto& class_info) {
                 class_info.iterate_properties([&](const auto& property) {
-                    using Property = cu::remove_all_t<decltype(property)>;
-                    using Value = typename Property::Value;
-                    static auto& value = property.get_value(result);
-                    if constexpr (Property::is_pointer) {
-                        Logvar(result.*Property::pointer_to_member);
-                    }
+                    auto& value = property.get_value(result);
                     _extract(value, property, json);
                 });
             });
@@ -129,7 +121,7 @@ namespace mapping {
 
             nlohmann::json json_value = json[property.name()];
 
-            if constexpr (Property::is_array_type) {
+            if constexpr (Property::Info::is_array_type) {
                 using ArrayValue = typename Property::Value::value_type;
                 for (const auto& val : json_value) {
                     if constexpr (_exists<ArrayValue>()) {
@@ -140,7 +132,7 @@ namespace mapping {
                     }
                 }
             }
-            else if constexpr (Property::is_custom_type) {
+            else if constexpr (Property::Info::is_custom_type) {
                 member = _parse<Member>(json_value);
             }
             else {

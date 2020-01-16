@@ -27,7 +27,7 @@ namespace mapping {
             bool result = false;
             cu::iterate_tuple(tuple, [&](const auto& val) {
                 using Property = std::remove_reference_t<decltype(val)>;
-                if constexpr (Property::is_custom_type) {
+                if constexpr (Property::Info::is_custom_type) {
                     result = true;
                 }
             });

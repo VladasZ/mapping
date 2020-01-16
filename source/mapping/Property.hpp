@@ -11,7 +11,7 @@
 #include <string>
 
 #include "Log.hpp"
-#include "MetaHelpers.hpp"
+#include "TypeInfo.hpp"
 
 namespace mapping {
 
@@ -37,30 +37,30 @@ namespace mapping {
 
         using PointerInfo = cu::pointer_to_member_info<Pointer>;
 
-        static constexpr auto is_pointer = std::is_pointer_v<typename PointerInfo::Value>;
-
         using Class =                       typename PointerInfo::Class;
         using Value = std::remove_pointer_t<typename PointerInfo::Value>;
 
         static constexpr auto pointer_to_member = _pointer_to_member;
 
-        static constexpr bool is_string    = std::is_same_v          <Value, std::string>;
-        static constexpr bool is_float     = std::is_floating_point_v<Value>;
-        static constexpr bool is_integer   = std::numeric_limits     <Value>::is_integer;
-
-        static constexpr bool is_vector = cu::is_vector_v<Value>;
-
-        static constexpr bool is_base_type   = is_string || is_float || is_integer || is_vector;
-        static constexpr bool is_array_type  = is_vector;
-        static constexpr bool is_custom_type = !is_base_type;
+        using Info = cu::TypeInfo<typename PointerInfo::Value>;
 
         static constexpr bool is_secure = type == PropertyType::Secure;
         static constexpr bool is_unique = type == PropertyType::Unique;
 
-        static constexpr bool is_valid = []() {
-            if constexpr (is_pointer) {
-                static_assert(is_custom_type);
-                return is_custom_type;
+        static constexpr bool is_array_of_custom_types = [] {
+            if constexpr (Info::is_array_type) {
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }();
+
+        static constexpr bool is_valid = [] {
+            if constexpr (Info::is_pointer) {
+                static_assert(Info::is_custom_type);
+                return Info::is_custom_type;
             }
             else {
                 return true;
@@ -77,7 +77,7 @@ namespace mapping {
         template <class T>
         static constexpr auto& get_value(T& object) {
             static_assert(cu::is_same_v<T, Class>);
-            if constexpr (is_pointer) {
+            if constexpr (Info::is_pointer) {
                 return *(object.*pointer_to_member);
             }
             else {
@@ -96,13 +96,13 @@ namespace mapping {
         }
 
         static std::string database_type_name() {
-            if constexpr (is_string) {
+            if constexpr (Info::is_string) {
                 return "TEXT";
             }
-            else if constexpr (is_float) {
+            else if constexpr (Info::is_float) {
                 return "REAL";
             }
-            else if constexpr (is_integer) {
+            else if constexpr (Info::is_integer) {
                 return "INTEGER";
             }
             else {
@@ -111,11 +111,14 @@ namespace mapping {
         }
 
         std::string to_string() const {
-            return std::string() +
-                   "Property: " + name() +
-                   ", type: " + cu::class_name<Value> +
-                   ", of class: " + class_name +
-                   ", is pointer: " + (is_pointer ? "true" : "false");
+            return std::string() + "\n" +
+                   "Property: " + name() + "\n" +
+                   ", type: " + cu::class_name<Value> + "\n" +
+                   ", of class: " + class_name + "\n" +
+                   ", is pointer: " + (Info::is_pointer ? "true" : "false") + "\n" +
+                   ", is array: " + (Info::is_array_type ? "true" : "false") + "\n" +
+                   ", is array of custom types: " + (is_array_of_custom_types ? "true" : "false")
+                   ;
         }
 
     };
