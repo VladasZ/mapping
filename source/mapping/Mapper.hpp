@@ -46,14 +46,6 @@ namespace mapping {
             return result;
         }
 
-        template <class Class, class Pointer, class PointerInfo = cu::pointer_to_member_info<Pointer>>
-        static constexpr auto& get(Class& object, const Pointer& pointer) {
-            static_assert(exists<Class>());
-            static_assert(cu::is_pointer_to_member_v<Pointer>);
-            static_assert(cu::is_same_v<typename PointerInfo::Class, Class>);
-            return object.*pointer;
-        }
-
         template <class T, class Action>
         static constexpr void get_class_info(const Action& action) {
             static_assert(exists<T>());
@@ -78,6 +70,26 @@ namespace mapping {
                 });
             });
 
+        }
+
+        template <class Class>
+        static constexpr Class create_empty() {
+            static_assert(exists<Class>());
+            Class result;
+            get_class_info<Class>([&](const auto& class_info) {
+                class_info.iterate_properties([&](const auto& property) {
+                    using Property = cu::remove_all_t<decltype(property)>;
+                    using Value = typename Property::Value;
+                    auto& reference = property.get_reference(result);
+                    if constexpr (Property::is_base_type) {
+                        reference = Value { };
+                    }
+                    else {
+                        reference = new Value { };
+                    }
+                });
+            });
+            return result;
         }
 
         template <class Class>

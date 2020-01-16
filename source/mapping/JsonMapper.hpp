@@ -31,6 +31,7 @@ namespace mapping {
             auto json = to_json(object);
             Log(json);
             auto parsed_object = parse<Class>(json);
+            Logvar(parsed_object.to_string());
             auto new_json = to_json(parsed_object);
             Log(new_json);
             assert(json == new_json);
@@ -69,7 +70,7 @@ namespace mapping {
                 class_info.iterate_properties([&](const auto& property) {
                     using Property = cu::remove_all_t<decltype(property)>;
                     const auto& value = Property::get_value(object);
-                         //   object.*Property::pointer;
+                    //   object.*Property::pointer;
                     if constexpr (Property::is_array_type) {
                         using ArrayValue = typename Property::Value::value_type;
                         json[property.name()] = nlohmann::json::array();
@@ -113,8 +114,10 @@ namespace mapping {
                 class_info.iterate_properties([&](const auto& property) {
                     using Property = cu::remove_all_t<decltype(property)>;
                     using Value = typename Property::Value;
-                    static constexpr auto pointer = Property::pointer;
-                    static constexpr auto& value = mapper.get(result, pointer);
+                    static auto& value = property.get_value(result);
+                    if constexpr (Property::is_pointer) {
+                        Logvar(result.*Property::pointer_to_member);
+                    }
                     _extract(value, property, json);
                 });
             });
@@ -127,9 +130,7 @@ namespace mapping {
             nlohmann::json json_value = json[property.name()];
 
             if constexpr (Property::is_array_type) {
-
                 using ArrayValue = typename Property::Value::value_type;
-
                 for (const auto& val : json_value) {
                     if constexpr (_exists<ArrayValue>()) {
                         member.push_back(_parse<typename Member::value_type>(val));
@@ -145,13 +146,7 @@ namespace mapping {
             else {
 #ifdef __cpp_exceptions
                 try {
-                    if constexpr (Property::is_pointer) {
-                        using CleanMember = std::remove_pointer_t<Member>;
-                        member = new CleanMember(json_value.get<CleanMember>());
-                    }
-                    else {
-                        member = json_value.get<Member>();
-                    }
+                    member = json_value.get<Member>();
                 }
                 catch (...) {
                     Fatal(std::string() +

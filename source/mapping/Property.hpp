@@ -23,7 +23,7 @@ namespace mapping {
 
     class is_property_cheker_base { };
 
-    template<auto _pointer, PropertyType type = PropertyType::None>
+    template<auto _pointer_to_member, PropertyType type = PropertyType::None>
     class Property : is_property_cheker_base {
 
 
@@ -31,7 +31,7 @@ namespace mapping {
 
     public:
 
-        using Pointer = decltype(_pointer);
+        using Pointer = decltype(_pointer_to_member);
 
         static_assert(cu::is_pointer_to_member_v<Pointer>);
 
@@ -42,7 +42,7 @@ namespace mapping {
         using Class =                       typename PointerInfo::Class;
         using Value = std::remove_pointer_t<typename PointerInfo::Value>;
 
-        static constexpr auto pointer = _pointer;
+        static constexpr auto pointer_to_member = _pointer_to_member;
 
         static constexpr bool is_string    = std::is_same_v          <Value, std::string>;
         static constexpr bool is_float     = std::is_floating_point_v<Value>;
@@ -58,7 +58,8 @@ namespace mapping {
         static constexpr bool is_unique = type == PropertyType::Unique;
 
         static constexpr bool is_valid = []() {
-            if (is_pointer) {
+            if constexpr (is_pointer) {
+                static_assert(is_custom_type);
                 return is_custom_type;
             }
             else {
@@ -77,11 +78,17 @@ namespace mapping {
         static constexpr auto& get_value(T& object) {
             static_assert(cu::is_same_v<T, Class>);
             if constexpr (is_pointer) {
-                return object->*pointer;
+                return *(object.*pointer_to_member);
             }
             else {
-                return object.*pointer;
+                return object.*pointer_to_member;
             }
+        }
+
+        template <class T>
+        static constexpr auto& get_reference(T& object) {
+            static_assert(cu::is_same_v<T, Class>);
+            return object.*pointer_to_member;
         }
 
         std::string name() const {
