@@ -68,7 +68,8 @@ namespace mapping {
             mapper.template get_class_info<Class>([&](const auto& class_info) {
                 class_info.iterate_properties([&](const auto& property) {
                     using Property = cu::remove_all_t<decltype(property)>;
-                    auto& value = object.*Property::pointer;
+                    const auto& value = Property::get_value(object);
+                         //   object.*Property::pointer;
                     if constexpr (Property::is_array_type) {
                         using ArrayValue = typename Property::Value::value_type;
                         json[property.name()] = nlohmann::json::array();

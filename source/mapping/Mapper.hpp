@@ -33,9 +33,10 @@ namespace mapping {
 
     public:
 
-        template <class Class>
+        template <class T>
         static constexpr bool exists() {
             bool result = false;
+            using Class = std::remove_pointer_t<T>;
             cu::iterate_tuple(classes_info, [&](const auto& val) {
                 using Info = cu::remove_all_t<decltype(val)>;
                 if constexpr (cu::is_same_v<Class, typename Info::Class>) {
@@ -53,15 +54,30 @@ namespace mapping {
             return object.*pointer;
         }
 
-        template <class Class, class Action>
+        template <class T, class Action>
         static constexpr void get_class_info(const Action& action) {
-            static_assert(exists<Class>());
+            static_assert(exists<T>());
+            using Class = std::remove_pointer_t<T>;
             cu::iterate_tuple(classes_info, [&] (const auto& info) {
                 using Info = cu::remove_all_t<decltype(info)>;
                 if constexpr (cu::is_same_v<Class, typename Info::Class>) {
                     action(info);
                 }
             });
+        }
+
+        template <class Pointer, class Action>
+        static constexpr void get_property(const Pointer& pointer, const Action& action) {
+            static_assert(cu::is_pointer_to_member_v<Pointer>);
+            using PointerInfo = cu::pointer_to_member_info<Pointer>;
+            using Class = typename PointerInfo::Class;
+            static_assert(exists<Class>());
+            get_class_info<Class>([&](const auto& class_info) {
+                class_info.template get_property(pointer, [&](const auto& property) {
+                    action(property);
+                });
+            });
+
         }
 
         template <class Class>

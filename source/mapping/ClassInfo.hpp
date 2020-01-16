@@ -65,6 +65,21 @@ namespace mapping {
             });
         }
 
+        template <class Pointer, class Action>
+        constexpr static void get_property(const Pointer& pointer, const Action& action) {
+            static_assert(cu::is_pointer_to_member_v<Pointer>);
+            using PointerInfo = cu::pointer_to_member_info<Pointer>;
+            static_assert(cu::is_same_v<typename PointerInfo::Class, Class>);
+            iterate_properties([&](const auto& property) {
+                using Property = cu::remove_all_t<decltype(property)>;
+                if constexpr (cu::is_same_v<Pointer, typename Property::Pointer>) {
+                    if (pointer == property.pointer) {
+                        action(property);
+                    }
+                }
+            });
+        }
+
     private:
 
         //MARK: - Tuple Check

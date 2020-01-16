@@ -26,15 +26,16 @@ namespace mapping {
     template<auto _pointer, PropertyType type = PropertyType::None>
     class Property : is_property_cheker_base {
 
+
+        const std::string_view _name;
+
+    public:
+
         using Pointer = decltype(_pointer);
 
         static_assert(cu::is_pointer_to_member_v<Pointer>);
 
         using PointerInfo = cu::pointer_to_member_info<Pointer>;
-
-        const std::string_view _name;
-
-    public:
 
         static constexpr auto is_pointer = std::is_pointer_v<typename PointerInfo::Value>;
 
@@ -56,8 +57,8 @@ namespace mapping {
         static constexpr bool is_secure = type == PropertyType::Secure;
         static constexpr bool is_unique = type == PropertyType::Unique;
 
-        static constexpr bool is_valid = [](){
-            if constexpr (is_pointer) {
+        static constexpr bool is_valid = []() {
+            if (is_pointer) {
                 return is_custom_type;
             }
             else {
@@ -70,6 +71,17 @@ namespace mapping {
         static inline const auto class_name = cu::class_name<Class>;
 
         constexpr Property(const std::string_view& name) : _name(name) {
+        }
+
+        template <class T>
+        static constexpr auto& get_value(T& object) {
+            static_assert(cu::is_same_v<T, Class>);
+            if constexpr (is_pointer) {
+                return object->*pointer;
+            }
+            else {
+                return object.*pointer;
+            }
         }
 
         std::string name() const {
@@ -93,7 +105,10 @@ namespace mapping {
 
         std::string to_string() const {
             return std::string() +
-                   "Property: " + name() + " type: " + class_name;
+                   "Property: " + name() +
+                   ", type: " + cu::class_name<Value> +
+                   ", of class: " + class_name +
+                   ", is pointer: " + (is_pointer ? "true" : "false");
         }
 
     };
