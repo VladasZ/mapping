@@ -111,10 +111,8 @@ namespace mapping {
             return std::string() + "\n" +
                    "Property: " + name() + "\n" +
                    ", type: " + cu::class_name<Value> + "\n" +
-                   ", of class: " + class_name + "\n" +
-                   ", is pointer: " + (Info::is_pointer ? "true" : "false") + "\n" +
-                   ", is array: " + (Info::is_array_type ? "true" : "false") + "\n" +
-                   ", is array of custom types: " + (Info::is_array_of_custom_types ? "true" : "false")
+                   ", of class: " + class_name + "\n"
+
                    ;
         }
 

@@ -110,6 +110,8 @@ namespace mapping {
             mapper.template get_class_info<Class>([&](const auto& class_info) {
                 class_info.iterate_properties([&](const auto& property) {
                     auto& value = property.get_value(result);
+                    Logvar(cu::class_name<cu::remove_all_t<decltype(value)>>);
+                    Logvar(property.name());
                     _extract(value, property, json);
                 });
             });
@@ -122,13 +124,21 @@ namespace mapping {
             nlohmann::json json_value = json[property.name()];
 
             Log(json_value.dump());
+            Log(property.name());
 
             if constexpr (Property::Info::is_array_type) {
                 using ArrayValue = typename Property::Value::value_type;
 
+                Logvar(cu::class_name<ArrayValue>);
+
                 for (const auto& val : json_value) {
                     if constexpr (_exists<ArrayValue>()) {
-                        member.push_back(_parse<typename Member::value_type>(val));
+                        if constexpr (Property::Info::is_pointer) {
+                            member.push_back(new ArrayValue(_parse<ArrayValue>(val)));
+                        }
+                        else {
+                            member.push_back(_parse<ArrayValue>(val));
+                        }
                     }
                     else {
                         member.push_back(val.get<ArrayValue>());
@@ -139,20 +149,7 @@ namespace mapping {
                 member = _parse<Member>(json_value);
             }
             else {
-#ifdef __cpp_exceptions
-                try {
-                    member = json_value.get<Member>();
-                }
-                catch (...) {
-                    Fatal(std::string() +
-                          "Invalid json value for key: \"" + property.name() + "\" of class: " + property.class_name + ". " +
-                          "Expected type: " + property.database_type_name() + " " +
-                          "JSON exception: " + what()
-                    );
-                }
-#else
-                member = json.value<Value>(std::string(property.name), Value { });
-#endif
+                member = json_value.get<Member>();
             }
         }
 

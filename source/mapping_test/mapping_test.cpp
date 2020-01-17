@@ -42,48 +42,48 @@ constexpr auto has_cats = mapper.exists<Cat>();
 
 void mapping::test() {
 
-    constexpr Cat cat { };
-
-    Cat mutable_cat;
-
-    mapper.get(mutable_cat, &Cat::age) = 111;
-    Log(mapper.get(mutable_cat, &Cat::age));
-
-    static_assert(mapper.get(cat, &Cat::age) == -1);
-
-    Logvar(mapper.to_string());
-    Logvar(mapper.exists<Cat>());
-
-    mapper.get_class_info<Cat>([&](const auto& info) {
-        Logvar(info.to_string());
-        Log("Speeess");
-    });
-
-    Logvar(mapper.get_class_name<Cat>());
-
-    static_assert(mapper.get_class_name<Cat>() == "Cat");
-
-    auto json = json_mapper.to_json(cat);
-
-    Logvar(json);
-
-    auto cat_parsed = json_mapper.parse<Cat>(json);
-
-    Logvar(json_mapper.to_json(cat_parsed));
-
-    cat_parsed.age = 111;
-    cat_parsed.height = 111;
-
-    cat_parsed = json_mapper.parse<Cat>(json_mapper.to_json(cat_parsed));
-
-    Logvar(json_mapper.to_json(cat_parsed));
-
-    const std::vector arr = {
-            cat,
-            cat_parsed,
-            cat
-    };
-
-    Logvar(json_mapper.array_to_json(arr));
+//    constexpr Cat cat { };
+//
+//    Cat mutable_cat;
+//
+//    mapper.get(mutable_cat, &Cat::age) = 111;
+//    Log(mapper.get(mutable_cat, &Cat::age));
+//
+//    static_assert(mapper.get(cat, &Cat::age) == -1);
+//
+//    Logvar(mapper.to_string());
+//    Logvar(mapper.exists<Cat>());
+//
+//    mapper.get_class_info<Cat>([&](const auto& info) {
+//        Logvar(info.to_string());
+//        Log("Speeess");
+//    });
+//
+//    Logvar(mapper.get_class_name<Cat>());
+//
+//    static_assert(mapper.get_class_name<Cat>() == "Cat");
+//
+//    auto json = json_mapper.to_json(cat);
+//
+//    Logvar(json);
+//
+//    auto cat_parsed = json_mapper.parse<Cat>(json);
+//
+//    Logvar(json_mapper.to_json(cat_parsed));
+//
+//    cat_parsed.age = 111;
+//    cat_parsed.height = 111;
+//
+//    cat_parsed = json_mapper.parse<Cat>(json_mapper.to_json(cat_parsed));
+//
+//    Logvar(json_mapper.to_json(cat_parsed));
+//
+//    const std::vector arr = {
+//            cat,
+//            cat_parsed,
+//            cat
+//    };
+//
+//    Logvar(json_mapper.array_to_json(arr));
 
 };
