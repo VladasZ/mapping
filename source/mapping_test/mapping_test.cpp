@@ -5,85 +5,67 @@
 
 #include "mapping_test.hpp"
 
-class Dog {
-public:
+using namespace mapping;
 
-    int age;
-    int height;
-
-    static constexpr std::string_view class_name() {
-        return "Dog";
-    }
-};
-
-class Cat {
-public:
-
-    int age    = -1;
-    int height = -1;
-
-};
-
-MAKE_CLASS_INFO(Cat, std::tuple(
-        MAKE_PROPERTY("age",    &Cat::age   ),
-        MAKE_PROPERTY("height", &Cat::height)
+MAKE_CLASS_INFO(TestMember, std::tuple(
+        MAKE_PROPERTY("a", &TestMember::c)
+        , MAKE_PROPERTY("b", &TestMember::d)
 ));
 
-MAKE_CLASS_INFO(Dog, std::tuple(
-        MAKE_PROPERTY("height", &Dog::height)
+MAKE_CLASS_INFO(TestClass, std::tuple(
+        MAKE_PROPERTY("a",                &TestClass::a)
+        , MAKE_PROPERTY("b",                &TestClass::b)
+        , MAKE_PROPERTY("lett",             &TestClass::lett)
+        , MAKE_PROPERTY("int_vector",       &TestClass::int_vector)
+        , MAKE_PROPERTY("member_pointer",   &TestClass::member_pointer)
+        , MAKE_PROPERTY("members",          &TestClass::members)
+        , MAKE_PROPERTY("members_pointers", &TestClass::members_pointers)
 ));
 
-MAKE_MAPPER(InfoOfCat, InfoOfDog, mapping::InfoOfTestClass);
+MAKE_MAPPER(mapper,
+            InfoOfTestMember,
+            InfoOfTestClass
+);
 
 constexpr auto json_mapper = mapping::JSONMapper<mapper>();
 
-constexpr auto has_cats = mapper.exists<Cat>();
+TestClass cl;
 
 
 void mapping::test() {
 
-//    constexpr Cat cat { };
-//
-//    Cat mutable_cat;
-//
-//    mapper.get(mutable_cat, &Cat::age) = 111;
-//    Log(mapper.get(mutable_cat, &Cat::age));
-//
-//    static_assert(mapper.get(cat, &Cat::age) == -1);
-//
-//    Logvar(mapper.to_string());
-//    Logvar(mapper.exists<Cat>());
-//
-//    mapper.get_class_info<Cat>([&](const auto& info) {
-//        Logvar(info.to_string());
-//        Log("Speeess");
-//    });
-//
-//    Logvar(mapper.get_class_name<Cat>());
-//
-//    static_assert(mapper.get_class_name<Cat>() == "Cat");
-//
-//    auto json = json_mapper.to_json(cat);
-//
-//    Logvar(json);
-//
-//    auto cat_parsed = json_mapper.parse<Cat>(json);
-//
-//    Logvar(json_mapper.to_json(cat_parsed));
-//
-//    cat_parsed.age = 111;
-//    cat_parsed.height = 111;
-//
-//    cat_parsed = json_mapper.parse<Cat>(json_mapper.to_json(cat_parsed));
-//
-//    Logvar(json_mapper.to_json(cat_parsed));
-//
-//    const std::vector arr = {
-//            cat,
-//            cat_parsed,
-//            cat
-//    };
-//
-//    Logvar(json_mapper.array_to_json(arr));
+    cl.a = 10;
+    cl.b = 20;
+    cl.lett = 'A';
+    cl.member_pointer = new TestMember();
+    cl.member_pointer->c = 30;
+    cl.member_pointer->d = 40;
+
+    cl.int_vector = { 44, 55, 66 };
+
+    cl.members.push_back({ 1, 2 });
+    cl.members.push_back({ 3, 4 });
+
+    cl.members_pointers.push_back(new TestMember { 5, 6 });
+    cl.members_pointers.push_back(new TestMember { 7, 8 });
+    cl.members_pointers.push_back(new TestMember { 7, 8 });
+    cl.members_pointers.push_back(new TestMember { 7, 8 });
+
+    mapper.get_property(&TestClass::int_vector, [&](const auto& property) {
+        Log(property.to_string());
+    });
+
+    mapper.get_property(&TestClass::members, [&](const auto& property) {
+        Log(property.to_string());
+    });
+
+    mapper.get_property(&TestClass::members_pointers, [&](const auto& property) {
+        Log(property.to_string());
+    });
+
+
+    while (true) {
+        json_mapper.test(cl);
+    }
 
 };

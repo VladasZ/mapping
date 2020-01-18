@@ -174,6 +174,6 @@ namespace mapping {
 
 }
 
-#define MAKE_MAPPER(...)\
-constexpr auto mapper_classes = std::make_tuple(__VA_ARGS__);\
-constexpr auto mapper = mapping::Mapper<mapper_classes>();
+#define MAKE_MAPPER(name, ...)\
+constexpr auto mapper_##name_classes = std::make_tuple(__VA_ARGS__);\
+constexpr auto name = mapping::Mapper<mapper_##name_classes>();

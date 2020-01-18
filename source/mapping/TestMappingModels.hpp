@@ -12,23 +12,37 @@
 
 namespace mapping {
 
-    class TestClass {
-
-    public:
-
-        uint8_t age = 100;
-        uint8_t page = 110;
-        uint8_t wage = 120;
-        uint8_t gage = 130;
-
+    class TestMember { public:
+        int c = 0, d = 0;
+        std::string to_string() const { return std::string() + VarString(c) + " " + VarString(d); }
     };
 
-    MAKE_CLASS_INFO(TestClass,
-                    std::tuple(
-                            MAKE_PROPERTY("age",    &TestClass::age),
-                            MAKE_PROPERTY("page", &TestClass::page),
-                            MAKE_PROPERTY("wage", &TestClass::wage),
-                            MAKE_PROPERTY("gage", &TestClass::gage)
-                    ));
+    class TestClass {
+    public:
+
+        int a;
+        int b;
+        char lett;
+
+        std::vector<int> int_vector;
+
+        std::vector<TestMember> members;
+        std::vector<TestMember*> members_pointers;
+
+        TestMember* member_pointer = nullptr;
+
+        TestClass() = default;
+        ~TestClass() {
+            if (member_pointer != nullptr) {
+                delete member_pointer;
+            }
+            for (auto mem : members_pointers) {
+                delete mem;
+            }
+        }
+
+        std::string to_string() const { return VarString(a) + " " + VarString(b) + " " + VarString(lett) + " " + VarString(member_pointer->to_string());
+        }
+    };
 
 }
