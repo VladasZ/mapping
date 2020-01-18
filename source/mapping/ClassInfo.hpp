@@ -17,43 +17,36 @@ namespace mapping {
 
     class is_class_info_cheker_base { };
 
-    template <auto& _properties>
+    template <class _Class, auto& _properties>
     class ClassInfo final : is_class_info_cheker_base {
 
     private:
 
-        template <class T>
-        static constexpr auto _has_custom_type_properties(const T& tuple) {
+        using Properties = std::remove_reference_t<decltype(_properties)>;
+
+        static_assert(cu::is_tuple_v<Properties>);
+
+    public:
+
+        using Class = _Class;
+
+        const std::string_view name;
+
+        static constexpr auto properties = _properties;
+
+        static constexpr bool has_custom_properties = [] {
             bool result = false;
-            cu::iterate_tuple(tuple, [&](const auto& val) {
+            cu::iterate_tuple(properties, [&](const auto& val) {
                 using Property = std::remove_reference_t<decltype(val)>;
                 if constexpr (Property::Info::is_custom_type) {
                     result = true;
                 }
             });
             return result;
-        }
-
-    private:
-
-        using Properties = cu::remove_all_t<decltype(_properties)>;
-
-        using _FirstPropertyType = cu::first_tuple_type<Properties>;
-
-        static_assert(cu::is_tuple_v<Properties>);
-        static_assert(is_property_v<_FirstPropertyType>);
-
-    public:
-
-        using Class = typename _FirstPropertyType::Class;
-
-        const std::string_view name;
-
-        static constexpr auto properties = _properties;
-        static constexpr bool has_custom_properties = _has_custom_type_properties(_properties);
+        };
 
         constexpr explicit ClassInfo(const std::string_view name) : name(name) {
-            static_assert(_tuple_is_valid(properties));
+            static_assert(tuple_is_valid);
         }
 
     public:
@@ -84,18 +77,16 @@ namespace mapping {
 
         //MARK: - Tuple Check
 
-        template <class T>
-        static constexpr auto _tuple_is_valid(const T& tuple) {
-            bool result = false;
-            cu::iterate_tuple(tuple, [&](const auto& val) {
+        static constexpr bool tuple_is_valid = [] {
+            cu::iterate_tuple(properties, [&](const auto& val) {
                 using Property = std::remove_reference_t<decltype(val)>;
-                if constexpr (is_property_v<Property>) {
-                    result = true;
-                }
-                static_assert(std::is_same_v<typename _FirstPropertyType::Class, typename Property::Class>);
+                static_assert(is_property_v<Property>);
+                constexpr bool is_same = std::is_same_v<Class, typename Property::Class>;
+                constexpr bool is_base = std::is_base_of_v<typename Property::Class, Class>;
+                static_assert(is_same || is_base);
             });
-            return result;
-        }
+            return true;
+        };
 
     public:
 
@@ -116,4 +107,4 @@ namespace mapping {
 
 #define MAKE_CLASS_INFO(name, ...)\
 static constexpr auto properties_of_##name = std::make_tuple(__VA_ARGS__);\
-static constexpr auto InfoOf##name = mapping::ClassInfo<properties_of_##name>(#name)
+static constexpr auto InfoOf##name = mapping::ClassInfo<name, properties_of_##name>(#name)
