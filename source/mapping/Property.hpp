@@ -49,7 +49,7 @@ namespace mapping {
 
         template <class T>
         static constexpr bool is_valid_class =
-                std::is_same_v<Class, T> || std::is_base_of_v<Class, T>;
+                cu::is_same_v<T, Class> || cu::is_base_of_v<Class, T>;
 
         static constexpr bool is_valid = [] {
             if constexpr (Info::is_base_type) {
@@ -93,7 +93,7 @@ namespace mapping {
 
         template <class T>
         static constexpr auto& get_reference(T& object) {
-            static_assert(cu::is_same_v<T, Class>);
+            static_assert(is_valid_class<T>);
             if constexpr (std::is_pointer_v<T>) {
                 return get_reference(*object);
             }
