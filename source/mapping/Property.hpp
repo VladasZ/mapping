@@ -9,6 +9,7 @@
 #pragma once
 
 #include <string>
+#include <source/cpp_utils/meta/TypeInfo.hpp>
 
 #include "Log.hpp"
 #include "TypeInfo.hpp"
@@ -47,9 +48,18 @@ namespace mapping {
         static constexpr bool is_unique = type == PropertyType::Unique;
 
         static constexpr bool is_valid = [] {
-            if constexpr (Info::is_pointer) {
+            if constexpr (Info::is_base_type) {
+                static_assert(!Info::is_pointer);
+                return true;
+            }
+            else if constexpr (Info::is_pointer) {
                 static_assert(Info::is_custom_type);
-                return Info::is_custom_type;
+                return true;
+            }
+            else if constexpr (Info::is_array_of_embedded_types) {
+                using ArrayValue = typename Value::value_type;
+                static_assert(!std::is_pointer_v<ArrayValue>);
+                return true;
             }
             else {
                 return true;

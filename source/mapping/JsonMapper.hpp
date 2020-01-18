@@ -82,17 +82,7 @@ namespace mapping {
                         }
                     }
                     else if constexpr (Property::Info::is_base_type) {
-                        if constexpr (Property::Info::is_pointer) {
-                            if (value == nullptr) {
-                                json[property.name()] = nlohmann::json();
-                            }
-                            else {
-                                json[property.name()] = *value;
-                            }
-                        }
-                        else {
-                            json[property.name()] = value;
-                        }
+                        json[property.name()] = value;
                     }
                     else {
                         json[property.name()] = _to_json(value);
@@ -110,8 +100,6 @@ namespace mapping {
             mapper.template get_class_info<Class>([&](const auto& class_info) {
                 class_info.iterate_properties([&](const auto& property) {
                     auto& value = property.get_reference(result);
-                    Logvar(cu::class_name<cu::remove_all_t<decltype(value)>>);
-                    Logvar(property.name());
                     _extract(value, property, json);
                 });
             });
@@ -132,19 +120,11 @@ namespace mapping {
                 using ArrayValue = cu::remove_all_t<typename Property::Value::value_type>;
 
                 for (const auto& val : json_value) {
-                    Log(val.dump());
                     if constexpr (_exists<ArrayValue>()) {
                         if constexpr (Property::Info::is_array_of_pointers) {
-                            Log(cu::class_name<decltype(member)>);
-                            Log(cu::class_name<ArrayValue>);
-//                            auto pointer_to_value = ne
-
-
-                            member.push_back(new ArrayValue());
-
-                            auto& p = *member.back();
-                            p = _parse<ArrayValue>(val);
-
+                            auto new_value = mapper.template allocate_empty<ArrayValue>();
+                            *new_value = _parse<ArrayValue>(val);
+                            member.push_back(new_value);
                         }
                         else {
                             member.push_back(_parse<ArrayValue>(val));
@@ -158,11 +138,7 @@ namespace mapping {
             else if constexpr (Property::Info::is_custom_type) {
                 if constexpr (Property::Info::is_pointer) {
                     using Value = typename Property::Value;
-                    Log(cu::class_name<Member>);
-                    Log(cu::class_name<typename Property::Value>);
-
                     *member = _parse<Value>(json_value);
-
                 }
                 else {
                     member = _parse<Member>(json_value);
@@ -170,7 +146,6 @@ namespace mapping {
             }
             else {
                 member = json_value.get<Member>();
-                Log(member);
             }
         }
 

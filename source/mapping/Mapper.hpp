@@ -73,6 +73,14 @@ namespace mapping {
         }
 
         template <class Class>
+        static constexpr Class* allocate_empty() {
+            static_assert(exists<Class>());
+            auto pointer = new Class { };
+            *pointer = create_empty<Class>();
+            return pointer;
+        }
+
+        template <class Class>
         static constexpr Class create_empty() {
             static_assert(exists<Class>());
             Class result;
@@ -81,12 +89,18 @@ namespace mapping {
                     using Property = cu::remove_all_t<decltype(property)>;
                     using Value = typename Property::Value;
                     auto& reference = property.get_reference(result);
-               //     Log(property.to_string());
+                    constexpr bool is_custom_type = Property::Info::is_custom_type;
                     if constexpr (Property::Info::is_pointer) {
-                        reference = new Value { };
+                        static_assert(is_custom_type);
+                        reference = allocate_empty<Value>();
                     }
                     else {
-                        reference = Value { };
+                        if constexpr (is_custom_type) {
+                            reference = create_empty<Value>();
+                        }
+                        else {
+                            reference = Value { };
+                        }
                     }
                 });
             });
@@ -131,20 +145,14 @@ namespace mapping {
                 static_assert(is_class_info_v<ClassInfo>);
 
                 if constexpr (ClassInfo::has_custom_properties) {
-
                     ClassInfo::iterate_properties([&](const auto& property) {
-
                         using Property = cu::remove_all_t<decltype(property)>;
-
                         if constexpr (Property::Info::is_custom_type) {
                             using Value = typename Property::Value;
                             static_assert(exists<Value>());
                         }
-
                     });
-
                 }
-
             });
 
             return true;
