@@ -1,9 +1,13 @@
 
-#include "mapping_test.hpp"
+
+#include "Log.hpp"
+
+#include "TestMappingModels.hpp"
+
+using namespace mapping;
 
 int main() {
 
-    mapping::test();
 
     return 0;
 }

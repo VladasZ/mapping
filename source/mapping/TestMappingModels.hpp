@@ -12,6 +12,12 @@
 
 namespace mapping {
 
+    class Private {
+    private:
+        int a;
+    };
+
+
     class Simple {
     public:
         int a;
