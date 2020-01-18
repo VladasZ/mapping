@@ -109,7 +109,7 @@ namespace mapping {
             Class result = mapper.template create_empty<Class>();
             mapper.template get_class_info<Class>([&](const auto& class_info) {
                 class_info.iterate_properties([&](const auto& property) {
-                    auto& value = property.get_value(result);
+                    auto& value = property.get_reference(result);
                     Logvar(cu::class_name<cu::remove_all_t<decltype(value)>>);
                     Logvar(property.name());
                     _extract(value, property, json);
@@ -121,20 +121,30 @@ namespace mapping {
         template <class Member, class Property>
         static void _extract(Member& member, const Property& property, const nlohmann::json& json) {
 
+            if (json.find(property.name()) == json.end()) {
+                Log("not found");
+                return;
+            }
+
             nlohmann::json json_value = json[property.name()];
 
-            Log(json_value.dump());
-            Log(property.name());
-
             if constexpr (Property::Info::is_array_type) {
-                using ArrayValue = typename Property::Value::value_type;
-
-                Logvar(cu::class_name<ArrayValue>);
+                using ArrayValue = cu::remove_all_t<typename Property::Value::value_type>;
 
                 for (const auto& val : json_value) {
+                    Log(val.dump());
                     if constexpr (_exists<ArrayValue>()) {
-                        if constexpr (Property::Info::is_pointer) {
-                            member.push_back(new ArrayValue(_parse<ArrayValue>(val)));
+                        if constexpr (Property::Info::is_array_of_pointers) {
+                            Log(cu::class_name<decltype(member)>);
+                            Log(cu::class_name<ArrayValue>);
+//                            auto pointer_to_value = ne
+
+
+                            member.push_back(new ArrayValue());
+
+                            auto& p = *member.back();
+                            p = _parse<ArrayValue>(val);
+
                         }
                         else {
                             member.push_back(_parse<ArrayValue>(val));
@@ -146,10 +156,21 @@ namespace mapping {
                 }
             }
             else if constexpr (Property::Info::is_custom_type) {
-                member = _parse<Member>(json_value);
+                if constexpr (Property::Info::is_pointer) {
+                    using Value = typename Property::Value;
+                    Log(cu::class_name<Member>);
+                    Log(cu::class_name<typename Property::Value>);
+
+                    *member = _parse<Value>(json_value);
+
+                }
+                else {
+                    member = _parse<Member>(json_value);
+                }
             }
             else {
                 member = json_value.get<Member>();
+                Log(member);
             }
         }
 

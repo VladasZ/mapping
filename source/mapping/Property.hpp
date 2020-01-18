@@ -111,9 +111,8 @@ namespace mapping {
             return std::string() + "\n" +
                    "Property: " + name() + "\n" +
                    ", type: " + cu::class_name<Value> + "\n" +
-                   ", of class: " + class_name + "\n"
-
-                   ;
+                   ", of class: " + class_name + "\n" +
+                   Info::to_string();
         }
 
     };

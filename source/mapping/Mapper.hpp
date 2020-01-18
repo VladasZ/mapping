@@ -81,6 +81,7 @@ namespace mapping {
                     using Property = cu::remove_all_t<decltype(property)>;
                     using Value = typename Property::Value;
                     auto& reference = property.get_reference(result);
+               //     Log(property.to_string());
                     if constexpr (Property::Info::is_pointer) {
                         reference = new Value { };
                     }
