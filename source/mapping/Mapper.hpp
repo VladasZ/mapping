@@ -75,7 +75,6 @@ namespace mapping {
         static constexpr void iterate_properties(const Action& action) {
             static_assert(exists<T>());
             using Class = std::remove_pointer_t<T>;
-
             cu::iterate_tuple(classes_info, [&] (const auto& info) {
                 using ClassInfo = cu::remove_all_t<decltype(info)>;
                 constexpr bool is_same = cu::is_same_v<Class, typename ClassInfo::Class>;
@@ -86,14 +85,6 @@ namespace mapping {
                     });
                 }
             });
-
-//
-//            get_class_info<Class>([&](const auto& class_info) {
-//                using ClassInfo =  cu::remove_all_t<decltype(class_info)>;
-//                ClassInfo::iterate_properties([&](const auto& property) {
-//                    action(property);
-//                });
-//            });
         }
 
     public:
@@ -130,7 +121,7 @@ namespace mapping {
                 constexpr bool is_custom_type = Property::Info::is_custom_type;
                 if constexpr (Property::Info::is_pointer) {
                     static_assert(is_custom_type);
-                    reference = _allocate_empty<Value>();
+                    reference = nullptr;
                 }
                 else {
                     if constexpr (is_custom_type) {

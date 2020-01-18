@@ -8,18 +8,20 @@
 using namespace mapping;
 
 MAKE_CLASS_INFO(TestMember,
-          MAKE_PROPERTY("a", &TestMember::c)
-        , MAKE_PROPERTY("b", &TestMember::d)
+                MAKE_PROPERTY("a", &TestMember::c)
+, MAKE_PROPERTY("b", &TestMember::d)
 );
 
 MAKE_CLASS_INFO(TestClass,
-          MAKE_PROPERTY("a",                &TestClass::a)
-        , MAKE_PROPERTY("b",                &TestClass::b)
-        , MAKE_PROPERTY("lett",             &TestClass::lett)
-        , MAKE_PROPERTY("int_vector",       &TestClass::int_vector)
-        , MAKE_PROPERTY("member_pointer",   &TestClass::member_pointer)
-        , MAKE_PROPERTY("members",          &TestClass::members)
-        , MAKE_PROPERTY("members_pointers", &TestClass::members_pointers)
+                MAKE_PROPERTY("a",                   &TestClass::a),
+                MAKE_PROPERTY("b",                   &TestClass::b),
+                MAKE_PROPERTY("lett",                &TestClass::lett),
+                MAKE_PROPERTY("int_vector",          &TestClass::int_vector),
+                MAKE_PROPERTY("member",              &TestClass::member),
+                MAKE_PROPERTY("member_pointer",      &TestClass::member_pointer),
+                MAKE_PROPERTY("null_member_pointer", &TestClass::null_member_pointer),
+                MAKE_PROPERTY("members",             &TestClass::members),
+                MAKE_PROPERTY("members_pointers",    &TestClass::members_pointers)
 );
 
 MAKE_MAPPER(mapper,
@@ -48,8 +50,7 @@ void mapping::test() {
 
     cl.members_pointers.push_back(new TestMember { 5, 6 });
     cl.members_pointers.push_back(new TestMember { 7, 8 });
-    cl.members_pointers.push_back(new TestMember { 7, 8 });
-    cl.members_pointers.push_back(new TestMember { 7, 8 });
+
 
     mapper.get_property(&TestClass::int_vector, [&](const auto& property) {
         Log(property.to_string());

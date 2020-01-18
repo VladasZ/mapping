@@ -37,14 +37,20 @@ namespace mapping {
 
         std::vector<int> int_vector;
 
+        TestMember member;
+
+        TestMember* member_pointer = new TestMember();
+        TestMember* null_member_pointer = nullptr;
+
         std::vector<TestMember> members;
         std::vector<TestMember*> members_pointers;
-
-        TestMember* member_pointer = nullptr;
 
         TestClass() = default;
         ~TestClass() {
             if (member_pointer != nullptr) {
+                delete member_pointer;
+            }
+            if (null_member_pointer != nullptr) {
                 delete member_pointer;
             }
             for (auto mem : members_pointers) {

@@ -64,10 +64,17 @@ namespace mapping {
         template <class Class>
         static nlohmann::json _to_json(const Class& object) {
             static_assert(_exists<Class>());
+
+            if constexpr (std::is_pointer_v<Class>) {
+                if (object == nullptr) {
+                    return nullptr;
+                }
+            }
+
             nlohmann::json json;
             mapper.template iterate_properties<Class>([&](const auto& property) {
                 using Property = cu::remove_all_t<decltype(property)>;
-                const auto& value = Property::get_value(object);
+                const auto& value = Property::get_reference(object);
                 if constexpr (Property::Info::is_array_type) {
                     using ArrayValue = typename Property::Value::value_type;
                     json[property.name()] = nlohmann::json::array();
@@ -126,7 +133,12 @@ namespace mapping {
             }
             else if constexpr (Property::Info::is_custom_type) {
                 if constexpr (Property::Info::is_pointer) {
+                    if (json_value.is_null()) {
+                        member = nullptr;
+                        return;
+                    }
                     using Value = typename Property::Value;
+                    member = new Value { };
                     *member = _parse<Value>(json_value);
                 }
                 else {
