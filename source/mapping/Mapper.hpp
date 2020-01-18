@@ -21,14 +21,13 @@ namespace mapping {
     template <auto& classes_info>
     class Mapper : is_mapper_cheker_base {
 
-        using ClassesInfo = cu::remove_all_t<decltype(classes_info)>;
-
+        using ClassesInfo = std::remove_reference_t<decltype(classes_info)>;
         static_assert(cu::is_tuple_v<ClassesInfo>);
 
     public:
 
         constexpr explicit Mapper() {
-            static_assert(_check_classes_info(classes_info));
+            static_assert(_classes_info_is_valid);
         }
 
     public:
@@ -72,6 +71,31 @@ namespace mapping {
 
         }
 
+        template <class T, class Action>
+        static constexpr void iterate_properties(const Action& action) {
+            static_assert(exists<T>());
+            using Class = std::remove_pointer_t<T>;
+
+            cu::iterate_tuple(classes_info, [&] (const auto& info) {
+                using ClassInfo = cu::remove_all_t<decltype(info)>;
+                constexpr bool is_same = cu::is_same_v<Class, typename ClassInfo::Class>;
+                constexpr bool is_base = cu::is_base_of_v<typename ClassInfo::Class, Class>;
+                if constexpr (is_same || is_base) {
+                    ClassInfo::iterate_properties([&](const auto& property) {
+                        action(property);
+                    });
+                }
+            });
+
+//
+//            get_class_info<Class>([&](const auto& class_info) {
+//                using ClassInfo =  cu::remove_all_t<decltype(class_info)>;
+//                ClassInfo::iterate_properties([&](const auto& property) {
+//                    action(property);
+//                });
+//            });
+        }
+
     public:
 
         template <class Class>
@@ -99,25 +123,23 @@ namespace mapping {
         static constexpr Class _create_empty() {
             static_assert(exists<Class>());
             Class result;
-            get_class_info<Class>([&](const auto& class_info) {
-                class_info.iterate_properties([&](const auto& property) {
-                    using Property = cu::remove_all_t<decltype(property)>;
-                    using Value = typename Property::Value;
-                    auto& reference = property.get_reference(result);
-                    constexpr bool is_custom_type = Property::Info::is_custom_type;
-                    if constexpr (Property::Info::is_pointer) {
-                        static_assert(is_custom_type);
-                        reference = _allocate_empty<Value>();
+            iterate_properties<Class>([&](const auto& property) {
+                using Property = cu::remove_all_t<decltype(property)>;
+                using Value = typename Property::Value;
+                auto& reference = property.get_reference(result);
+                constexpr bool is_custom_type = Property::Info::is_custom_type;
+                if constexpr (Property::Info::is_pointer) {
+                    static_assert(is_custom_type);
+                    reference = _allocate_empty<Value>();
+                }
+                else {
+                    if constexpr (is_custom_type) {
+                        reference = _create_empty<Value>();
                     }
                     else {
-                        if constexpr (is_custom_type) {
-                            reference = _create_empty<Value>();
-                        }
-                        else {
-                            reference = Value { };
-                        }
+                        reference = Value { };
                     }
-                });
+                }
             });
             return result;
         }
@@ -137,12 +159,10 @@ namespace mapping {
         static constexpr bool is_equals(const Class& a, const Class& b) {
             static_assert(exists<Class>());
             bool result = true;
-            get_class_info<Class>([&](const auto& class_info) {
-                class_info.iterate_properties([&](const auto& property) {
-                    if (a.*property.pointer != b.*property.pointer) {
-                        result = false;
-                    }
-                });
+            iterate_properties<Class>([&](const auto& property) {
+                if (a.*property.pointer != b.*property.pointer) {
+                    result = false;
+                }
             });
             return result;
         }
@@ -151,16 +171,11 @@ namespace mapping {
 
         //MARK: - Tuple Check
 
-        template <class T>
-        static constexpr bool _check_classes_info(const T& tuple) {
-            constexpr auto tuple_size = std::tuple_size_v<T>;
-
-            cu::iterate_tuple(tuple, [&](const auto& class_info) {
-
+        static constexpr bool _classes_info_is_valid = [] {
+            cu::iterate_tuple(classes_info, [&](const auto& class_info) {
                 using ClassInfo = cu::remove_all_t<decltype(class_info)>;
-                using Class = typename ClassInfo::Class;
                 static_assert(is_class_info_v<ClassInfo>);
-
+                using Class = typename ClassInfo::Class;
                 if constexpr (ClassInfo::has_custom_properties) {
                     ClassInfo::iterate_properties([&](const auto& property) {
                         using Property = cu::remove_all_t<decltype(property)>;
@@ -171,9 +186,8 @@ namespace mapping {
                     });
                 }
             });
-
             return true;
-        }
+        }();
 
     public:
 

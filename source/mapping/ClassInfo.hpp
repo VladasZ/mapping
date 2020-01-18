@@ -17,13 +17,12 @@ namespace mapping {
 
     class is_class_info_cheker_base { };
 
-    template <class _Class, auto& _properties>
+    template <class _Class, auto& properties>
     class ClassInfo final : is_class_info_cheker_base {
 
     private:
 
-        using Properties = std::remove_reference_t<decltype(_properties)>;
-
+        using Properties = std::remove_reference_t<decltype(properties)>;
         static_assert(cu::is_tuple_v<Properties>);
 
     public:
@@ -31,8 +30,6 @@ namespace mapping {
         using Class = _Class;
 
         const std::string_view name;
-
-        static constexpr auto properties = _properties;
 
         static constexpr bool has_custom_properties = [] {
             bool result = false;

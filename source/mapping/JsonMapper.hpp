@@ -65,29 +65,27 @@ namespace mapping {
         static nlohmann::json _to_json(const Class& object) {
             static_assert(_exists<Class>());
             nlohmann::json json;
-            mapper.template get_class_info<Class>([&](const auto& class_info) {
-                class_info.iterate_properties([&](const auto& property) {
-                    using Property = cu::remove_all_t<decltype(property)>;
-                    const auto& value = Property::get_value(object);
-                    if constexpr (Property::Info::is_array_type) {
-                        using ArrayValue = typename Property::Value::value_type;
-                        json[property.name()] = nlohmann::json::array();
-                        for (const auto& val : value) {
-                            if constexpr (_exists<ArrayValue>()) {
-                                json[property.name()].push_back(_to_json(val));
-                            }
-                            else {
-                                json[property.name()].push_back(val);
-                            }
+            mapper.template iterate_properties<Class>([&](const auto& property) {
+                using Property = cu::remove_all_t<decltype(property)>;
+                const auto& value = Property::get_value(object);
+                if constexpr (Property::Info::is_array_type) {
+                    using ArrayValue = typename Property::Value::value_type;
+                    json[property.name()] = nlohmann::json::array();
+                    for (const auto& val : value) {
+                        if constexpr (_exists<ArrayValue>()) {
+                            json[property.name()].push_back(_to_json(val));
+                        }
+                        else {
+                            json[property.name()].push_back(val);
                         }
                     }
-                    else if constexpr (Property::Info::is_base_type) {
-                        json[property.name()] = value;
-                    }
-                    else {
-                        json[property.name()] = _to_json(value);
-                    }
-                });
+                }
+                else if constexpr (Property::Info::is_base_type) {
+                    json[property.name()] = value;
+                }
+                else {
+                    json[property.name()] = _to_json(value);
+                }
             });
             return json;
         }
@@ -97,11 +95,9 @@ namespace mapping {
         static Class _parse(const nlohmann::json& json) {
             static_assert(_exists<Class>());
             Class result = mapper.template create_empty<Class>();
-            mapper.template get_class_info<Class>([&](const auto& class_info) {
-                class_info.iterate_properties([&](const auto& property) {
-                    auto& value = property.get_reference(result);
-                    _extract(value, property, json);
-                });
+            mapper.template iterate_properties<Class>([&](const auto& property) {
+                auto& value = property.get_reference(result);
+                _extract(value, property, json);
             });
             return result;
         }
