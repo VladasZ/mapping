@@ -117,18 +117,11 @@ namespace mapping {
             nlohmann::json json_value = json[property.name()];
 
             if constexpr (Property::Info::is_array_type) {
-                using ArrayValue = cu::remove_all_t<typename Property::Value::value_type>;
+                using ArrayValue = typename Property::Value::value_type;
 
                 for (const auto& val : json_value) {
                     if constexpr (_exists<ArrayValue>()) {
-                        if constexpr (Property::Info::is_array_of_pointers) {
-                            auto new_value = mapper.template allocate_empty<ArrayValue>();
-                            *new_value = _parse<ArrayValue>(val);
-                            member.push_back(new_value);
-                        }
-                        else {
-                            member.push_back(_parse<ArrayValue>(val));
-                        }
+                        member.push_back(_parse<ArrayValue>(val));
                     }
                     else {
                         member.push_back(val.get<ArrayValue>());
@@ -152,6 +145,14 @@ namespace mapping {
         template <class Class>
         static constexpr bool _exists() {
             return mapper.template exists<Class>();
+        }
+
+    public:
+
+        template <class Class>
+        static void print(const Class& object) {
+            static_assert(_exists<Class>());
+            std::cout << to_json(object) << std::endl;
         }
 
     };

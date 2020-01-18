@@ -72,16 +72,31 @@ namespace mapping {
 
         }
 
+    public:
+
         template <class Class>
-        static constexpr Class* allocate_empty() {
+        static constexpr Class create_empty() {
+            static_assert(exists<Class>());
+            if constexpr (std::is_pointer_v<Class>) {
+                return _allocate_empty<cu::remove_all_t<Class>>();
+            }
+            else {
+                return _create_empty<Class>();
+            }
+        }
+
+    private:
+
+        template <class Class>
+        static constexpr Class* _allocate_empty() {
             static_assert(exists<Class>());
             auto pointer = new Class { };
-            *pointer = create_empty<Class>();
+            *pointer = _create_empty<Class>();
             return pointer;
         }
 
         template <class Class>
-        static constexpr Class create_empty() {
+        static constexpr Class _create_empty() {
             static_assert(exists<Class>());
             Class result;
             get_class_info<Class>([&](const auto& class_info) {
@@ -92,11 +107,11 @@ namespace mapping {
                     constexpr bool is_custom_type = Property::Info::is_custom_type;
                     if constexpr (Property::Info::is_pointer) {
                         static_assert(is_custom_type);
-                        reference = allocate_empty<Value>();
+                        reference = _allocate_empty<Value>();
                     }
                     else {
                         if constexpr (is_custom_type) {
-                            reference = create_empty<Value>();
+                            reference = _create_empty<Value>();
                         }
                         else {
                             reference = Value { };
@@ -106,6 +121,8 @@ namespace mapping {
             });
             return result;
         }
+
+    public:
 
         template <class Class>
         static constexpr std::string_view get_class_name() {

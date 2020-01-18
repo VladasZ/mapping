@@ -12,6 +12,11 @@
 
 namespace mapping {
 
+    class Simple {
+    public:
+        int a;
+    };
+
     class TestMember { public:
         int c = 0, d = 0;
         std::string to_string() const { return std::string() + VarString(c) + " " + VarString(d); }

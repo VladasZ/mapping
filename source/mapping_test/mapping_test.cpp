@@ -7,20 +7,20 @@
 
 using namespace mapping;
 
-MAKE_CLASS_INFO(TestMember, std::tuple(
-        MAKE_PROPERTY("a", &TestMember::c)
+MAKE_CLASS_INFO(TestMember,
+          MAKE_PROPERTY("a", &TestMember::c)
         , MAKE_PROPERTY("b", &TestMember::d)
-));
+);
 
-MAKE_CLASS_INFO(TestClass, std::tuple(
-        MAKE_PROPERTY("a",                &TestClass::a)
+MAKE_CLASS_INFO(TestClass,
+          MAKE_PROPERTY("a",                &TestClass::a)
         , MAKE_PROPERTY("b",                &TestClass::b)
         , MAKE_PROPERTY("lett",             &TestClass::lett)
         , MAKE_PROPERTY("int_vector",       &TestClass::int_vector)
         , MAKE_PROPERTY("member_pointer",   &TestClass::member_pointer)
         , MAKE_PROPERTY("members",          &TestClass::members)
         , MAKE_PROPERTY("members_pointers", &TestClass::members_pointers)
-));
+);
 
 MAKE_MAPPER(mapper,
             InfoOfTestMember,
