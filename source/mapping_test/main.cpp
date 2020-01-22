@@ -13,7 +13,7 @@ using namespace mapping;
 
 int main() {
 
-    //test();
+    test();
 
     return 0;
 }

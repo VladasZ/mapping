@@ -17,14 +17,18 @@
 
 namespace mapping {
 
-    template <auto& mapper>
-    class JSONMapper {
+    class is_json_mapper_cheker_base { };
 
-        using Mapper = cu::remove_all_t<decltype(mapper)>;
+    template <auto& _mapper>
+    class JSONMapper : is_json_mapper_cheker_base {
+
+        using Mapper = cu::remove_all_t<decltype(_mapper)>;
 
         static_assert(is_mapper_v<Mapper>);
 
     public:
+
+        static constexpr auto mapper = _mapper;
 
         template <class Class>
         static void test(const Class& object) {
@@ -164,5 +168,7 @@ namespace mapping {
         }
 
     };
+
+    template <class T> constexpr bool is_json_mapper_v = std::is_base_of_v<is_json_mapper_cheker_base, cu::remove_all_t<T>>;
 
 }
