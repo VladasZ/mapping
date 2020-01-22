@@ -22,51 +22,52 @@ namespace mapping {
     template <auto& _mapper>
     class JSONMapper : is_json_mapper_cheker_base {
 
+    public:
+
+        using JSON = nlohmann::json;
+
         using Mapper = cu::remove_all_t<decltype(_mapper)>;
 
         static_assert(is_mapper_v<Mapper>);
-
-    public:
 
         static constexpr auto mapper = _mapper;
 
         template <class Class>
         static void test(const Class& object) {
-            auto json = to_json(object);
+            auto json = to_json_string(object);
             Log(json);
-            auto parsed_object = parse<Class>(json);
-            auto new_json = to_json(parsed_object);
+            auto parsed_object = parse_string<Class>(json);
+            auto new_json = to_json_string(parsed_object);
             Log(new_json);
             assert(json == new_json);
         }
 
         template <class Class>
-        static Class parse(const std::string& json_string) {
+        static Class parse_string(const std::string& json_string) {
             static_assert(_exists<Class>());
-            return _parse<Class>(nlohmann::json::parse(json_string, nullptr, false));
+            return parse_json<Class>(JSON::parse(json_string, nullptr, false));
         }
 
         template <class Class>
-        static std::string to_json(const Class& object) {
+        static std::string to_json_string(const Class& object) {
             static_assert(_exists<Class>());
-            return _to_json(object).dump();
+            return to_json(object).dump();
         }
 
         template<class Array>
-        static std::string array_to_json(const Array& array) {
+        static std::string array_to_json_string(const Array& array) {
             using Class = typename Array::value_type;
             static_assert(_exists<Class>());
-            auto result = nlohmann::json::array();
+            auto result = JSON::array();
             for (const auto& value : array) {
-                result.push_back(_to_json(value));
+                result.push_back(to_json(value));
             }
             return result.dump();
         }
 
-    private:
 
         template <class Class>
-        static nlohmann::json _to_json(const Class& object) {
+        static JSON to_json(const Class& object) {
             static_assert(_exists<Class>());
 
             if constexpr (std::is_pointer_v<Class>) {
@@ -75,16 +76,16 @@ namespace mapping {
                 }
             }
 
-            nlohmann::json json;
+            JSON json;
             mapper.template iterate_properties<Class>([&](const auto& property) {
                 using Property = cu::remove_all_t<decltype(property)>;
                 const auto& value = Property::get_reference(object);
                 if constexpr (Property::Info::is_array_type) {
                     using ArrayValue = typename Property::Value::value_type;
-                    json[property.name()] = nlohmann::json::array();
+                    json[property.name()] = JSON::array();
                     for (const auto& val : value) {
                         if constexpr (_exists<ArrayValue>()) {
-                            json[property.name()].push_back(_to_json(val));
+                            json[property.name()].push_back(to_json(val));
                         }
                         else {
                             json[property.name()].push_back(val);
@@ -95,7 +96,7 @@ namespace mapping {
                     json[property.name()] = value;
                 }
                 else {
-                    json[property.name()] = _to_json(value);
+                    json[property.name()] = to_json(value);
                 }
             });
             return json;
@@ -103,7 +104,7 @@ namespace mapping {
 
 
         template <class Class>
-        static Class _parse(const nlohmann::json& json) {
+        static Class parse_json(const JSON& json) {
             static_assert(_exists<Class>());
             Class result = mapper.template create_empty<Class>();
             mapper.template iterate_properties<Class>([&](const auto& property) {
@@ -113,22 +114,24 @@ namespace mapping {
             return result;
         }
 
+    private:
+
         template <class Member, class Property>
-        static void _extract(Member& member, const Property& property, const nlohmann::json& json) {
+        static void _extract(Member& member, const Property& property, const JSON& json) {
 
             if (json.find(property.name()) == json.end()) {
                 Log("not found");
                 return;
             }
 
-            nlohmann::json json_value = json[property.name()];
+            JSON json_value = json[property.name()];
 
             if constexpr (Property::Info::is_array_type) {
                 using ArrayValue = typename Property::Value::value_type;
 
                 for (const auto& val : json_value) {
                     if constexpr (_exists<ArrayValue>()) {
-                        member.push_back(_parse<ArrayValue>(val));
+                        member.push_back(parse_json<ArrayValue>(val));
                     }
                     else {
                         member.push_back(val.get<ArrayValue>());
@@ -143,10 +146,10 @@ namespace mapping {
                     }
                     using Value = typename Property::Value;
                     member = new Value { };
-                    *member = _parse<Value>(json_value);
+                    *member = parse_json<Value>(json_value);
                 }
                 else {
-                    member = _parse<Member>(json_value);
+                    member = parse_json<Member>(json_value);
                 }
             }
             else {
@@ -164,7 +167,7 @@ namespace mapping {
         template <class Class>
         static void print(const Class& object) {
             static_assert(_exists<Class>());
-            std::cout << to_json(object) << std::endl;
+            std::cout << to_json_string(object) << std::endl;
         }
 
     };
