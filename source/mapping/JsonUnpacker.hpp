@@ -38,7 +38,7 @@ namespace mapping {
         }
 
         template <class Class>
-        static JSON pack_to_json_string(const Class& object) {
+        static std::string pack_to_json_string(const Class& object) {
             static_assert(exists<Class>);
             return pack_to_json<Class>(object).dump();
         }
