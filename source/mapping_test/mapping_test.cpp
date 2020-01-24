@@ -16,6 +16,8 @@ MAKE_CLASS_INFO(TestClass,
                 MAKE_PROPERTY("a",                   &TestClass::a),
                 MAKE_PROPERTY("b",                   &TestClass::b),
                 MAKE_PROPERTY("lett",                &TestClass::lett),
+                MAKE_PROPERTY("enum",                &TestClass::enum_value),
+                MAKE_PROPERTY("enum_class",          &TestClass::enum_class_value),
                 MAKE_PROPERTY("int_vector",          &TestClass::int_vector),
                 MAKE_PROPERTY("member",              &TestClass::member),
                 MAKE_PROPERTY("member_pointer",      &TestClass::member_pointer),
@@ -39,6 +41,10 @@ void mapping::test() {
     cl.a = 10;
     cl.b = 20;
     cl.lett = 'A';
+
+    cl.enum_value = TestEnum::b;
+    cl.enum_class_value = TestEnumClass::d;
+
     cl.member_pointer = new TestMember();
     cl.member_pointer->c = 30;
     cl.member_pointer->d = 40;
@@ -50,7 +56,6 @@ void mapping::test() {
 
     cl.members_pointers.push_back(new TestMember { 5, 6 });
     cl.members_pointers.push_back(new TestMember { 7, 8 });
-
 
     mapper.get_property(&TestClass::int_vector, [&](const auto& property) {
         Log(property.to_string());

@@ -28,12 +28,19 @@ namespace mapping {
         std::string to_string() const { return std::string() + VarString(c) + " " + VarString(d); }
     };
 
+    enum TestEnum { a = 11, b = 12 };
+
+    enum class TestEnumClass { c = 10, d = 20 };
+
     class TestClass {
     public:
 
         int a;
         int b;
         char lett;
+
+        TestEnum enum_value;
+        TestEnumClass enum_class_value;
 
         std::vector<int> int_vector;
 
