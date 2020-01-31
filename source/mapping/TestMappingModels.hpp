@@ -52,7 +52,7 @@ namespace mapping {
         std::vector<TestMember> members;
         std::vector<TestMember*> members_pointers;
 
-        TestClass() = default;
+        TestClass() { };
         ~TestClass() {
             if (member_pointer != nullptr) {
                 delete member_pointer;
