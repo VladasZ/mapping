@@ -10,9 +10,9 @@
 
 #include <iostream>
 
-#include "Property.hpp"
 #include "ClassInfo.hpp"
 #include "ArrayUtils.hpp"
+#include "MappingProperty.hpp"
 
 namespace mapping {
 

@@ -12,7 +12,7 @@
 
 #include "Log.hpp"
 #include "Value.hpp"
-#include "Property.hpp"
+#include "MappingProperty.hpp"
 
 #define _TEMPLATE template
 
