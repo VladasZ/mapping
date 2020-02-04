@@ -36,11 +36,8 @@ namespace mapping {
 
         static std::string create_table_command() {
             std::string command = "CREATE TABLE IF NOT EXISTS ";
-
-
             command += T::class_name();
             command += " (\n";
-
             T::iterate_properties([&](auto property) {
                 command += property.name + " " + property.database_type_name();
                 if (property.is_unique) {
@@ -48,12 +45,9 @@ namespace mapping {
                 }
                 command += ",\n";
             });
-
             command.pop_back();
             command.pop_back();
-
             command += "\n);";
-
             return command;
         }
 

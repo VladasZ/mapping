@@ -121,6 +121,15 @@ namespace mapping {
             }
         }
 
+        static std::string database_value(const Class& value) {
+            if constexpr (Info::is_string) {
+                return std::string() + "\'" + value.*pointer_to_member + "\'";
+            }
+            else {
+                return std::to_string(value.*pointer_to_member);
+            }
+        }
+
         std::string to_string() const {
             return std::string() + "\n" +
                    "Property: " + name() + "\n" +
