@@ -10,8 +10,8 @@
 
 #include <iostream>
 
-#include "MappingProperty.hpp"
 #include "MetaHelpers.hpp"
+#include "MappingProperty.hpp"
 
 namespace mapping {
 
