@@ -50,8 +50,6 @@ namespace mapping {
             return Mapper::template exists<Class>();
         }
 
-
-
     };
 
 }

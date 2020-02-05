@@ -10,9 +10,9 @@
 
 #include <iostream>
 
+#include "Property.hpp"
 #include "ClassInfo.hpp"
 #include "ArrayUtils.hpp"
-#include "MappingProperty.hpp"
 
 namespace mapping {
 
@@ -151,6 +151,13 @@ namespace mapping {
     public:
 
         template <class Class>
+        static constexpr bool has_id = []{
+            bool result = false;
+            get_class_info<Class>([&](auto class_info) { result = class_info.has_id; });
+            return result;
+        }();
+
+        template <class Class>
         static constexpr std::string_view get_class_name() {
             std::string_view result;
             get_class_info<Class>([&](const auto& info) {
@@ -210,5 +217,5 @@ namespace mapping {
 }
 
 #define MAKE_MAPPER(name, ...)\
-constexpr auto mapper_##name_classes = std::make_tuple(__VA_ARGS__);\
-constexpr auto name = mapping::Mapper<mapper_##name_classes>();
+static constexpr auto mapper_##name_classes = std::make_tuple(__VA_ARGS__);\
+static constexpr auto name = mapping::Mapper<mapper_##name_classes>();

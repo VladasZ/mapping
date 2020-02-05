@@ -16,8 +16,11 @@
 
 namespace mapping {
 
+    using ID = unsigned;
+
     enum class PropertyType {
         None,
+        ID,
         Secure,
         Unique
     };
@@ -44,6 +47,7 @@ namespace mapping {
 
         using Info = cu::TypeInfo<typename PointerInfo::Value>;
 
+        static constexpr bool is_id     = type == PropertyType::ID;
         static constexpr bool is_secure = type == PropertyType::Secure;
         static constexpr bool is_unique = type == PropertyType::Unique;
 
@@ -52,6 +56,9 @@ namespace mapping {
                 cu::is_same_v<T, Class> || cu::is_base_of_v<Class, T>;
 
         static constexpr bool is_valid = [] {
+            if constexpr (is_id) {
+                static_assert(std::is_same_v<Value, ID>);
+            }
             if constexpr (Info::is_base_type) {
                 static_assert(!Info::is_pointer);
                 return true;
@@ -145,3 +152,4 @@ namespace mapping {
 }
 
 #define MAKE_PROPERTY(name, pointer) mapping::Property<pointer>(name)
+#define MAKE_ID_PROPERTY(name, pointer) mapping::Property<pointer, mapping::PropertyType::ID>(name)

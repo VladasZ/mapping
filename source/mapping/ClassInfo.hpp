@@ -10,8 +10,8 @@
 
 #include <iostream>
 
+#include "Property.hpp"
 #include "MetaHelpers.hpp"
-#include "MappingProperty.hpp"
 
 namespace mapping {
 
@@ -83,6 +83,12 @@ namespace mapping {
             return result;
         }
 
+        static constexpr bool has_id = [] {
+            bool result = false;
+            iterate_properties([&](auto property) { if (property.is_id) result = true; });
+            return result;
+        }();
+
     private:
 
         //MARK: - Tuple Check
@@ -116,5 +122,5 @@ namespace mapping {
 }
 
 #define MAKE_CLASS_INFO(name, ...)\
-constexpr auto properties_of_##name = std::make_tuple(__VA_ARGS__);\
-constexpr auto InfoOf##name = mapping::ClassInfo<name, properties_of_##name, __LINE__>(#name)
+static constexpr auto properties_of_##name = std::make_tuple(__VA_ARGS__);\
+static constexpr auto InfoOf##name = mapping::ClassInfo<name, properties_of_##name, __LINE__>(#name)
