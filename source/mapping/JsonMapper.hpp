@@ -120,7 +120,6 @@ namespace mapping {
         static void _extract(Member& member, const Property& property, const JSON& json) {
 
             if (json.find(property.name()) == json.end()) {
-                Log("not found");
                 return;
             }
 
