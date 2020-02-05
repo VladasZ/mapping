@@ -95,7 +95,12 @@ namespace mapping {
         static std::string get_property_name() {
             std::string result;
             get_property<pointer>([&](auto property) {
-               result = property.name();
+                if constexpr (property.is_id) {
+                    result = "rowid";
+                }
+                else {
+                    result = property.name();
+                }
             });
             return result;
         }
