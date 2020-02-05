@@ -80,18 +80,24 @@ namespace mapping {
             });
         }
 
-        template <class Pointer, class Action>
-        static constexpr void get_property(const Pointer& pointer, const Action& action) {
-            static_assert(cu::is_pointer_to_member_v<Pointer>);
-            using PointerInfo = cu::pointer_to_member_info<Pointer>;
-            using Class = typename PointerInfo::Class;
+        template <auto pointer, class Pointer = decltype(pointer), class Action>
+        static constexpr void get_property(const Action& action) {
+            using Class = typename cu::pointer_to_member_class<Pointer>::type;
             static_assert(exists<Class>());
             get_class_info<Class>([&](const auto& class_info) {
-                class_info.template get_property(pointer, [&](const auto& property) {
+                class_info.template get_property<pointer>([&](const auto& property) {
                     action(property);
                 });
             });
+        }
 
+        template <auto pointer>
+        static std::string get_property_name() {
+            std::string result;
+            get_property<pointer>([&](auto property) {
+               result = property.name();
+            });
+            return result;
         }
 
     public:

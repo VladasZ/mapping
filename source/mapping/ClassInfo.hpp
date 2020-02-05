@@ -57,19 +57,30 @@ namespace mapping {
             });
         }
 
-        template <class Pointer, class Action>
-        constexpr static void get_property(const Pointer& pointer_to_member, const Action& action) {
+        template <auto pointer, class Pointer = decltype(pointer), class Action>
+        constexpr static void get_property(const Action& action) {
             static_assert(cu::is_pointer_to_member_v<Pointer>);
             using PointerInfo = cu::pointer_to_member_info<Pointer>;
             static_assert(cu::is_same_v<typename PointerInfo::Class, Class>);
             iterate_properties([&](const auto& property) {
                 using Property = cu::remove_all_t<decltype(property)>;
                 if constexpr (cu::is_same_v<Pointer, typename Property::Pointer>) {
-                    if (pointer_to_member == property.pointer_to_member) {
+                    if constexpr (pointer == Property::pointer_to_member) {
                         action(property);
                     }
                 }
             });
+        }
+
+        template <auto pointer,
+                  class Pointer = decltype(pointer),
+                  class Value = typename cu::pointer_to_member_value<Pointer>::type>
+        constexpr static Value get_value(Class& obj) {
+            Value result { };
+            get_property<pointer>([&](auto property) {
+                result = property.get_reference(obj);
+            });
+            return result;
         }
 
     private:
@@ -77,8 +88,8 @@ namespace mapping {
         //MARK: - Tuple Check
 
         static constexpr bool tuple_is_valid = [] {
-            cu::iterate_tuple(properties, [&](const auto& val) {
-                using Property = std::remove_reference_t<decltype(val)>;
+            cu::iterate_tuple(properties, [&](const auto& property) {
+                using Property = std::remove_reference_t<decltype(property)>;
                 static_assert(is_property_v<Property>);
                 constexpr bool is_same = std::is_same_v<Class, typename Property::Class>;
                 constexpr bool is_base = std::is_base_of_v<typename Property::Class, Class>;
@@ -92,7 +103,7 @@ namespace mapping {
         std::string to_string() const {
             std::string result = std::string(name) + "\n";
             result += std::string() + "has custom props: " + (has_custom_properties ? "true" : "false") + "\n";
-            iterate_properties([&](const auto& prop){
+            iterate_properties([&](const auto& prop) {
                 result += prop.to_string() + "\n";
             });
             return result;
