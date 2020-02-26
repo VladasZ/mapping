@@ -153,3 +153,4 @@ namespace mapping {
 
 #define MAKE_PROPERTY(name, pointer) mapping::Property<pointer>(name)
 #define MAKE_ID_PROPERTY(name, pointer) mapping::Property<pointer, mapping::PropertyType::ID>(name)
+#define MAKE_SECURE_PROPERTY(name, pointer) mapping::Property<pointer, mapping::PropertyType::Secure>(name)

@@ -28,6 +28,8 @@ namespace mapping {
 
         using Mapper = cu::remove_all_t<decltype(_mapper)>;
 
+        static constexpr bool check_for_input = true;
+
         static_assert(is_mapper_v<Mapper>);
 
         static constexpr auto mapper = _mapper;
@@ -79,6 +81,7 @@ namespace mapping {
             JSON json;
             mapper.template iterate_properties<Class>([&](const auto& property) {
                 using Property = cu::remove_all_t<decltype(property)>;
+                if constexpr (Property::is_secure) return;
                 const auto& value = Property::get_reference(object);
                 if constexpr (Property::Info::is_array_type) {
                     using ArrayValue = typename Property::Value::value_type;
@@ -119,6 +122,10 @@ namespace mapping {
         template <class Member, class Property>
         static void _extract(Member& member, const Property& property, const JSON& json) {
 
+            if constexpr (check_for_input) {
+                check_input(property.name());
+            }
+
             if (json.find(property.name()) == json.end()) {
                 return;
             }
@@ -152,7 +159,21 @@ namespace mapping {
                 }
             }
             else {
+                if constexpr (check_for_input) {
+                    if constexpr (Property::Info::is_string) {
+                        check_input(json_value.get<std::string>());
+                    }
+                }
                 member = json_value.get<Member>();
+            }
+        }
+
+        static void check_input(const std::string& string) {
+            static constexpr std::array forbidded_symbols = { '\"', '\'', ':', '.', '=', '*', ';', ',', '?' };
+            for (auto ch : string) {
+                if (cu::array::contains(forbidded_symbols, ch)) {
+                    throw std::runtime_error("Invalid symbols in string: " + string);
+                };
             }
         }
 
