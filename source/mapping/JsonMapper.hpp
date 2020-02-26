@@ -159,10 +159,8 @@ namespace mapping {
                 }
             }
             else {
-                if constexpr (check_for_input) {
-                    if constexpr (Property::Info::is_string) {
-                        check_input(json_value.get<std::string>());
-                    }
+                if constexpr (check_for_input && Property::Info::is_string) {
+                    check_input(json_value.get<std::string>());
                 }
                 member = json_value.get<Member>();
             }
