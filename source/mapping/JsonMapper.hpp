@@ -9,8 +9,7 @@
 #pragma once
 
 #include <iostream>
-
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 #include "Mapper.hpp"
 #include "ExceptionCatch.hpp"
@@ -82,7 +81,12 @@ namespace mapping {
                 using Property = cu::remove_all_t<decltype(property)>;
                 if constexpr (Property::is_secure) return;
                 const auto& value = Property::get_reference(object);
-                if constexpr (Property::Info::is_array_type) {
+                if constexpr (Property::Info::is_map_type) {
+                    for (const auto& [key, value] : value) {
+                        json[property.name()][key] = value;
+                    }
+                }
+                else if constexpr (Property::Info::is_array_type) {
                     using ArrayValue = typename Property::Value::value_type;
                     json[property.name()] = JSON::array();
                     for (const auto& val : value) {
@@ -97,8 +101,12 @@ namespace mapping {
                 else if constexpr (Property::Info::is_base_type) {
                     json[property.name()] = value;
                 }
-                else {
+                else if constexpr (Property::Info::is_custom_type) {
                     json[property.name()] = to_json(value);
+                }
+                else {
+                    static_assert(false);
+                    //Unknown type
                 }
             });
             return json;
@@ -130,7 +138,12 @@ namespace mapping {
 
             JSON json_value = json[property.name()];
 
-            if constexpr (Property::Info::is_array_type) {
+            if constexpr (Property::Info::is_map_type) {
+                for (const auto& value : json_value.get<JSON::object_t>()) {
+                    member[value.first] = value.second;
+                }
+            }
+            else if constexpr (Property::Info::is_array_type) {
                 using ArrayValue = typename Property::Value::value_type;
 
                 for (const auto& val : json_value) {

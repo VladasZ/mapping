@@ -67,8 +67,10 @@ namespace mapping {
                 static_assert(Info::is_custom_type);
                 return true;
             }
-            else if constexpr (Info::is_array_of_embedded_types) {
-                static_assert(!std::is_pointer_v<typename Value::value_type>);
+            else if constexpr (Info::is_array_type) {
+                //if constexpr (cu::TypeInfo<typename Value::value_type>::is_embedded_type) {
+                    static_assert(!std::is_pointer_v<typename Value::value_type>);
+                //}
                 return true;
             }
             else {
