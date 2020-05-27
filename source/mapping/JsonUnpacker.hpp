@@ -10,6 +10,7 @@
 
 #include "JsonMapper.hpp"
 
+
 namespace mapping {
 
     template <class RootClass, auto& json_mapper>

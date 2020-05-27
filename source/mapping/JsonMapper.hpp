@@ -28,7 +28,7 @@ namespace mapping {
 
         using Mapper = cu::remove_all_t<decltype(_mapper)>;
 
-        static constexpr bool check_for_input = true;
+        static constexpr bool check_for_input = false;
 
         static_assert(is_mapper_v<Mapper>);
 
@@ -67,7 +67,6 @@ namespace mapping {
             return result.dump();
         }
 
-
         template <class Class>
         static JSON to_json(const Class& object) {
             static_assert(exists<Class>());
@@ -104,7 +103,6 @@ namespace mapping {
             });
             return json;
         }
-
 
         template <class Class>
         static Class parse_json(const JSON& json) {
