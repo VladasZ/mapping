@@ -222,5 +222,5 @@ namespace mapping {
 }
 
 #define MAKE_MAPPER(name, ...)\
-static constexpr auto mapper_##name_classes = std::make_tuple(__VA_ARGS__);\
-static constexpr auto name = mapping::Mapper<mapper_##name_classes>();
+inline constexpr auto mapper_##name_classes = std::make_tuple(__VA_ARGS__);\
+inline constexpr auto name = mapping::Mapper<mapper_##name_classes>();

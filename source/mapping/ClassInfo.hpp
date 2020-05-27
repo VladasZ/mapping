@@ -122,5 +122,5 @@ namespace mapping {
 }
 
 #define MAKE_CLASS_INFO(name, ...)\
-static constexpr auto properties_of_##name = std::make_tuple(__VA_ARGS__);\
-static constexpr auto InfoOf##name = mapping::ClassInfo<name, properties_of_##name, __LINE__>(#name)
+inline constexpr auto properties_of_##name = std::make_tuple(__VA_ARGS__);\
+inline constexpr auto InfoOf##name = mapping::ClassInfo<name, properties_of_##name, __LINE__>(#name)
