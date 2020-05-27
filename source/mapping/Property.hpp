@@ -82,6 +82,7 @@ namespace mapping {
         static inline const auto class_name = cu::class_name<Class>;
 
         constexpr Property(const std::string_view& name) : _name(name) {
+
         }
 
         template <class T>

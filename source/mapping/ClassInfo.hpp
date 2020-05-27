@@ -42,7 +42,7 @@ namespace mapping {
                 }
             });
             return result;
-        };
+        }();
 
         constexpr explicit ClassInfo(const std::string_view name) : name(name) {
             static_assert(tuple_is_valid);
@@ -102,7 +102,7 @@ namespace mapping {
                 static_assert(is_same || is_base);
             });
             return true;
-        };
+        }();
 
     public:
 
