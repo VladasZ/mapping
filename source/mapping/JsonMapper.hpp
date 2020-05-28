@@ -101,13 +101,13 @@ namespace mapping {
                 else if constexpr (Property::Info::is_base_type) {
                     json[property.name()] = value;
                 }
-                else if constexpr (Property::Info::is_custom_type) {
+                else {
                     json[property.name()] = to_json(value);
                 }
-                else {
-                    static_assert(false);
-                    //Unknown type
-                }
+//                else {
+//                    static_assert(false);
+//                    //Unknown type
+//                }
             });
             return json;
         }
@@ -202,5 +202,7 @@ namespace mapping {
     };
 
     template <class T> constexpr bool is_json_mapper_v = std::is_base_of_v<is_json_mapper_cheker_base, cu::remove_all_t<T>>;
+
+    inline constexpr JSONMapper<empty_mapper> empty_json_mapper;
 
 }
