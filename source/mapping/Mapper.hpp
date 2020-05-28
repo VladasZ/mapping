@@ -21,6 +21,8 @@ namespace mapping {
     template <auto& classes_info>
     class Mapper : is_mapper_cheker_base {
 
+        using This = Mapper<classes_info>;
+
         using ClassesInfo = std::remove_reference_t<decltype(classes_info)>;
         static_assert(cu::is_tuple_v<ClassesInfo>);
 
@@ -197,7 +199,7 @@ namespace mapping {
                         using Property = cu::remove_all_t<decltype(property)>;
                         if constexpr (Property::Info::is_custom_type) {
                             using Value = typename Property::Value;
-                            static_assert(exists<Value>());
+                            static_assert(This::exists<Value>());
                         }
                     });
                 }
