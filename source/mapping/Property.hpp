@@ -27,7 +27,7 @@ namespace mapping {
 
     class is_property_cheker_base { };
 
-    template<auto _pointer_to_member, PropertyType type = PropertyType::None>
+    template<auto _pointer_to_member, PropertyType type = PropertyType::None, bool optional = false>
     class Property : is_property_cheker_base {
 
         const std::string_view _name;
@@ -50,6 +50,8 @@ namespace mapping {
         static constexpr bool is_id     = type == PropertyType::ID;
         static constexpr bool is_secure = type == PropertyType::Secure;
         static constexpr bool is_unique = type == PropertyType::Unique;
+
+        static constexpr bool is_optional = optional;
 
         template <class T>
         static constexpr bool is_valid_class =
@@ -82,7 +84,7 @@ namespace mapping {
 
         static inline const auto class_name = cu::class_name<Class>;
 
-        constexpr Property(const std::string_view& name) : _name(name) {
+        explicit constexpr Property(const std::string_view& name) : _name(name) {
 
         }
 
@@ -142,9 +144,8 @@ namespace mapping {
         std::string to_string() const {
             return std::string() + "\n" +
                    "Property: " + name() + "\n" +
-                   ", type: " + cu::class_name<Value> + "\n" +
-                   ", of class: " + class_name + "\n" +
-                   Info::to_string();
+                   "type: " + cu::class_name<Value> + "\n" +
+                   "of class: " + class_name + "\n";
         }
 
     };

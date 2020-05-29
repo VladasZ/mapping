@@ -11,6 +11,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
+#include "Result.hpp"
 #include "Mapper.hpp"
 #include "ExceptionCatch.hpp"
 
@@ -37,16 +38,26 @@ namespace mapping {
         static void test(const Class& object) {
             auto json = to_json_string(object);
             Log(json);
-            auto parsed_object = parse_string<Class>(json);
+            auto parsed_object = parse<Class>(json);
             auto new_json = to_json_string(parsed_object);
             Log(new_json);
             assert(json == new_json);
         }
 
         template <class Class>
-        static Class parse_string(const std::string& json_string) {
+        static cu::Result<Class> try_parse(const std::string& json) {
+            try {
+                return parse<Class>(json);
+            }
+            catch (...) {
+                return what();
+            }
+        }
+
+        template <class Class>
+        static Class parse(const std::string& json) {
             static_assert(exists<Class>());
-            return parse_json<Class>(JSON::parse(json_string, nullptr, false));
+            return parse_json<Class>(JSON::parse(json));
         }
 
         template <class Class>
@@ -112,6 +123,8 @@ namespace mapping {
             return json;
         }
 
+    private:
+
         template <class Class>
         static Class parse_json(const JSON& json) {
             static_assert(exists<Class>());
@@ -132,8 +145,11 @@ namespace mapping {
                 check_input(property.name());
             }
 
-            if (json.find(property.name()) == json.end()) {
-                return;
+            bool exists_in_json = json.find(property.name()) != json.end();
+
+            if (!exists_in_json) {
+                if (property.is_optional) return;
+                throw std::runtime_error(std::string() + "\nFailed to parse JSON for: " + property.to_string());
             }
 
             JSON json_value = json[property.name()];
