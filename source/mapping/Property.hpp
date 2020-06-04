@@ -59,7 +59,7 @@ namespace mapping {
 
         static constexpr bool is_valid = [] {
             if constexpr (is_id) {
-                static_assert(std::is_same_v<Value, ID>);
+                static_assert(std::is_same_v<Value, ID>, "ID propery must be of unsigned type.");
             }
             if constexpr (Info::is_base_type) {
                 static_assert(!Info::is_pointer);
@@ -155,5 +155,5 @@ namespace mapping {
 }
 
 #define MAKE_PROPERTY(name, pointer) mapping::Property<pointer>(name)
-#define MAKE_ID_PROPERTY(name, pointer) mapping::Property<pointer, mapping::PropertyType::ID>(name)
+#define MAKE_ID_PROPERTY(pointer) mapping::Property<pointer, mapping::PropertyType::ID>("id")
 #define MAKE_SECURE_PROPERTY(name, pointer) mapping::Property<pointer, mapping::PropertyType::Secure>(name)
