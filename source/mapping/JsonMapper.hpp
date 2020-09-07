@@ -50,7 +50,7 @@ namespace mapping {
                 return parse<Class>(json);
             }
             catch (...) {
-                return what();
+                return {};// what();
             }
         }
 
