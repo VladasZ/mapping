@@ -123,7 +123,7 @@ namespace mapping {
             return json;
         }
 
-    private:
+    public:
 
         template <class Class>
         static Class parse_json(const JSON& json) {
@@ -149,7 +149,7 @@ namespace mapping {
 
             if (!exists_in_json) {
                 if (property.is_optional) return;
-                throw std::runtime_error(std::string() + "\nFailed to parse JSON for: " + property.to_string());
+                throw std::runtime_error(std::string() + "Failed to parse JSON for: " + property.to_string());
             }
 
             JSON json_value = json[property.name()];

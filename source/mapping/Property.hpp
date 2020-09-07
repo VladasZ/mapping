@@ -137,7 +137,8 @@ namespace mapping {
                 return std::string() + "\'" + value.*pointer_to_member + "\'";
             }
             else {
-                return std::to_string(value.*pointer_to_member);
+                Log << cu::class_name<Class>;
+                return "FAIL";// std::to_string(value.*pointer_to_member);
             }
         }
 
