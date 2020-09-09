@@ -148,8 +148,16 @@ namespace mapping {
             bool exists_in_json = json.find(property.name()) != json.end();
 
             if (!exists_in_json) {
-                if (property.is_optional) return;
-                throw std::runtime_error(std::string() + "Failed to parse JSON for: " + property.to_string());
+                if constexpr (property.is_optional) {
+                    return;
+                }
+                /*else if constexpr (property.is_id) {
+                    member = -1;
+                    return;
+                }*/
+                else {
+                    throw std::runtime_error(CU_LOG_LOCATION + " Failed to parse JSON for: " + property.to_string());
+                }
             }
 
             JSON json_value = json[property.name()];
