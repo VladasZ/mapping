@@ -148,7 +148,7 @@ namespace mapping {
             bool exists_in_json = json.find(property.name()) != json.end();
 
             if (!exists_in_json) {
-                if constexpr (property.is_optional) {
+                if constexpr (Property::is_optional) {
                     return;
                 }
                 /*else if constexpr (property.is_id) {
