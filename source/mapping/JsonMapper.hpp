@@ -37,10 +37,10 @@ namespace mapping {
         template <class Class>
         static void test(const Class& object) {
             auto json = to_json_string(object);
-            Log(json);
+            Log << json;
             auto parsed_object = parse<Class>(json);
             auto new_json = to_json_string(parsed_object);
-            Log(new_json);
+            Log << new_json;
             assert(json == new_json);
         }
 

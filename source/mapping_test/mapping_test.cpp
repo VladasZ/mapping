@@ -58,15 +58,15 @@ void mapping::test() {
     cl.members_pointers.push_back(new TestMember { 7, 8 });
 
     mapper.get_property<&TestClass::int_vector>([&](const auto& property) {
-        Log(property.to_string());
+        Log << property;
     });
 
     mapper.get_property<&TestClass::members>([&](const auto& property) {
-        Log(property.to_string());
+        Log << property;
     });
 
     mapper.get_property<&TestClass::members_pointers>([&](const auto& property) {
-        Log(property.to_string());
+        Log << property;
     });
 
 
