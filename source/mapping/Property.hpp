@@ -83,7 +83,7 @@ namespace mapping {
             if constexpr (std::is_pointer_v<T>) {
                 return get_value(*object);
             }
-            else if constexpr (Info::is_pointer) {
+            else if constexpr (ValueInfo::is_pointer) {
                 return *(object.*pointer_to_member);
             }
             else {
