@@ -56,20 +56,20 @@ namespace mapping {
 
         template <class Class>
         static Class parse(const std::string& json) {
-            static_assert(exists<Class>());
+            static_assert(exists<Class>);
             return parse_json<Class>(JSON::parse(json));
         }
 
         template <class Class>
         static std::string to_json_string(const Class& object) {
-            static_assert(exists<Class>());
+            static_assert(exists<Class>);
             return to_json(object).dump();
         }
 
         template<class Array>
         static std::string array_to_json_string(const Array& array) {
             using Class = typename Array::value_type;
-            static_assert(exists<Class>());
+            static_assert(exists<Class>);
             auto result = JSON::array();
             for (const auto& value : array) {
                 result.push_back(to_json(value));
@@ -79,7 +79,7 @@ namespace mapping {
 
         template <class Class>
         static JSON to_json(const Class& object) {
-            static_assert(exists<Class>());
+            static_assert(exists<Class>);
 
             if constexpr (std::is_pointer_v<Class>) {
                 if (object == nullptr) {
@@ -92,16 +92,16 @@ namespace mapping {
                 using Property = cu::remove_all_t<decltype(property)>;
                 if constexpr (Property::is_secure) return;
                 const auto& value = Property::get_reference(object);
-                if constexpr (Property::Info::is_map_type) {
+                if constexpr (Property::ValueInfo::is_map_type) {
                     for (const auto& [key, value] : value) {
                         json[property.name()][key] = value;
                     }
                 }
-                else if constexpr (Property::Info::is_array_type) {
+                else if constexpr (Property::ValueInfo::is_array_type) {
                     using ArrayValue = typename Property::Value::value_type;
                     json[property.name()] = JSON::array();
                     for (const auto& val : value) {
-                        if constexpr (exists<ArrayValue>()) {
+                        if constexpr (exists<ArrayValue>) {
                             json[property.name()].push_back(to_json(val));
                         }
                         else {
@@ -109,7 +109,7 @@ namespace mapping {
                         }
                     }
                 }
-                else if constexpr (Property::Info::is_base_type) {
+                else if constexpr (Property::ValueInfo::is_base_type) {
                     json[property.name()] = value;
                 }
                 else {
@@ -127,7 +127,7 @@ namespace mapping {
 
         template <class Class>
         static Class parse_json(const JSON& json) {
-            static_assert(exists<Class>());
+            static_assert(exists<Class>);
             Class result = mapper.template create_empty<Class>();
             mapper.template iterate_properties<Class>([&](const auto& property) {
                 auto& value = property.get_reference(result);
@@ -162,16 +162,16 @@ namespace mapping {
 
             JSON json_value = json[property.name()];
 
-            if constexpr (Property::Info::is_map_type) {
+            if constexpr (Property::ValueInfo::is_map_type) {
                 for (const auto& value : json_value.get<JSON::object_t>()) {
                     member[value.first] = value.second;
                 }
             }
-            else if constexpr (Property::Info::is_array_type) {
+            else if constexpr (Property::ValueInfo::is_array_type) {
                 using ArrayValue = typename Property::Value::value_type;
 
                 for (const auto& val : json_value) {
-                    if constexpr (exists<ArrayValue>()) {
+                    if constexpr (exists<ArrayValue>) {
                         member.push_back(parse_json<ArrayValue>(val));
                     }
                     else {
@@ -179,8 +179,8 @@ namespace mapping {
                     }
                 }
             }
-            else if constexpr (Property::Info::is_custom_type) {
-                if constexpr (Property::Info::is_pointer) {
+            else if constexpr (Property::ValueInfo::is_custom_type) {
+                if constexpr (Property::ValueInfo::is_pointer) {
                     if (json_value.is_null()) {
                         member = nullptr;
                         return;
@@ -194,7 +194,7 @@ namespace mapping {
                 }
             }
             else {
-                if constexpr (check_for_input && Property::Info::is_string) {
+                if constexpr (check_for_input && Property::ValueInfo::is_string) {
                     check_input(json_value.get<std::string>());
                 }
                 member = json_value.get<Member>();
@@ -213,13 +213,11 @@ namespace mapping {
     public:
 
         template <class Class>
-        static constexpr bool exists() {
-            return mapper.template exists<Class>();
-        }
+        static constexpr bool exists = mapper.exists<Class>;
 
         template <class Class>
         static void print(const Class& object) {
-            static_assert(exists<Class>());
+            static_assert(exists<Class>);
             std::cout << to_json_string(object) << std::endl;
         }
 

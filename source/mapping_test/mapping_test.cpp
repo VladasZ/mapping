@@ -70,8 +70,6 @@ void mapping::test() {
     });
 
 
-    while (true) {
-        json_mapper.test(cl);
-    }
+    json_mapper.test(cl);
 
 };

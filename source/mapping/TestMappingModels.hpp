@@ -54,7 +54,7 @@ namespace mapping {
 
         TestClass() { };
         ~TestClass() {
-            if (member_pointer != nullptr) {
+   /*         if (member_pointer != nullptr) {
                 delete member_pointer;
             }
             if (null_member_pointer != nullptr) {
@@ -62,7 +62,7 @@ namespace mapping {
             }
             for (auto mem : members_pointers) {
                 delete mem;
-            }
+            }*/
         }
 
         std::string to_string() const { return VarString(a) + " " + VarString(b) + " " + VarString(lett) + " " + VarString(member_pointer->to_string());

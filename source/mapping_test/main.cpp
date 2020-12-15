@@ -1,19 +1,31 @@
  
-
 #include "Log.hpp"
-
-#include <unordered_map>
-
+#include "JsonMapper.hpp"
 #include "mapping_test.hpp"
-#include "TestMappingModels.hpp"
 
 using namespace mapping;
 
-//constexpr std::unordered_map<unsigned, std::string> mop = { { 1, "lsls"} };
+template <class T>
+class Spec {
+public:
+    T a;
+    T b;
+};
+
+constexpr auto pointer = &Spec<float>::a;
+
+template <class T>
+constexpr auto ptr = &Spec<T>::a;
+
+
+constexpr auto ko = ptr<int>;
+
 
 int main() {
 
     test();
+
+    // Log << json_mapper.to_json(Spec<int>());
 
     return 0;
 }
