@@ -12,18 +12,44 @@ public:
     T b;
 };
 
-constexpr auto pointer = &Spec<float>::a;
+template <class T>
+constexpr auto t_a = mapping::Property<&Spec<T>::a>("a");
 
 template <class T>
-constexpr auto ptr = &Spec<T>::a;
+constexpr auto t_b = mapping::Property<&Spec<T>::a>("b");
+
+template <class T>
+constexpr auto properties_of_Spec = std::make_tuple(t_a<T>, t_b<T>);
 
 
-constexpr auto ko = ptr<int>;
 
+template <class T>
+constexpr auto InfoOfSpec = mapping::ClassInfo<Spec<T>, properties_of_Spec<T>>("Spec");
+
+
+struct InferByCall {
+
+    template <class T>
+    static void print(const T& value) {
+        Log << value;
+    }
+
+};
+
+template <class T>
+static void infer_by_call(const T& value) {
+    Log << value;
+}
 
 int main() {
 
-    test();
+    Log << InfoOfSpec<float>;
+
+    InferByCall::print(5);
+
+    infer_by_call(5);
+
+    //test();
 
     // Log << json_mapper.to_json(Spec<int>());
 

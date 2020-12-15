@@ -32,8 +32,6 @@ namespace mapping {
             static_assert(_classes_info_is_valid);
         }
 
-    public:
-
         template <class T, class Action>
         static constexpr void iterate_properties(const Action& action) {
             static_assert(exists<T>);

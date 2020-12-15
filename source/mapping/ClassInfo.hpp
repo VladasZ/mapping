@@ -17,7 +17,7 @@ namespace mapping {
 
     class is_class_info_cheker_base { };
 
-    template <class _Class, auto& properties, unsigned _id>
+    template <class _Class, auto& properties>
     class ClassInfo final : is_class_info_cheker_base {
 
     private:
@@ -28,8 +28,6 @@ namespace mapping {
     public:
 
         using Class = _Class;
-
-        static constexpr auto id = _id;
 
         const std::string_view name;
 
@@ -123,4 +121,4 @@ namespace mapping {
 
 #define MAKE_CLASS_INFO(name, ...)\
 inline constexpr auto properties_of_##name = std::make_tuple(__VA_ARGS__);\
-inline constexpr auto InfoOf##name = mapping::ClassInfo<name, properties_of_##name, __LINE__>(#name)
+inline constexpr auto InfoOf##name = mapping::ClassInfo<name, properties_of_##name>(#name)
