@@ -30,7 +30,7 @@ namespace mapping {
 
         template <class T>
         static constexpr int _class_index() {
-            static_assert(exists<T>);
+            static_assert(exists<T>());
             int result = -1;
             cu::indexed_iterate_tuple(classes, [&](auto index, auto info) {
                 if constexpr (cu::is_same_v<T, typename decltype(info)::Class>) {
@@ -42,7 +42,7 @@ namespace mapping {
 
         template <class Class>
         static constexpr Class _create_empty() {
-            static_assert(exists<Class>);
+            static_assert(exists<Class>());
             Class result;
             iterate_properties<Class>([&](auto property) {
                 using Property = decltype(property);
@@ -82,7 +82,7 @@ namespace mapping {
         }
 
         template <class T>
-        static constexpr bool exists = [] {
+        static constexpr bool exists() {
             bool result = false;
             using Class = std::remove_pointer_t<T>;
             iterate_classes([&](auto val) {
@@ -92,7 +92,7 @@ namespace mapping {
                 }
             });
             return result;
-        }();
+        };
 
         template <class T>
         static constexpr auto info() {
@@ -101,7 +101,7 @@ namespace mapping {
 
         template <auto pointer, class Pointer = decltype(pointer), class Class = cu::pointer_to_member_class_t<Pointer>>
         static constexpr auto property() {
-            static_assert(exists<Class>);
+            static_assert(exists<Class>());
             return info<Class>().template property<pointer>();
         }
 
@@ -120,7 +120,7 @@ namespace mapping {
 
         template <class Class>
         static constexpr Class create_empty() {
-            static_assert(exists<Class>);
+            static_assert(exists<Class>());
             if constexpr (std::is_pointer_v<Class>) {
                 return _allocate_empty<cu::remove_all_t<Class>>();
             }
@@ -148,7 +148,7 @@ namespace mapping {
 
         template <class Class>
         static constexpr std::string_view class_name() {
-            static_assert(exists<Class>);
+            static_assert(exists<Class>());
             return info<Class>().name;
         }
 
@@ -177,7 +177,7 @@ namespace mapping {
                         using Property = decltype(property);
                         if constexpr (Property::ValueInfo::is_custom_type) {
                             using Value = typename Property::Value;
-                            static_assert(exists<Value>);
+                            static_assert(exists<Value>());
                         }
                     });
                 }

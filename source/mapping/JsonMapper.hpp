@@ -57,13 +57,13 @@ namespace mapping {
 
         template <class T>
         static T parse(const std::string& json) {
-            static_assert(exists<T>);
+            static_assert(exists<T>());
             return parse_json<T>(JSON::parse(json));
         }
 
         template <class T>
         static std::string to_json_string(const T& object) {
-            static_assert(exists<T>);
+            static_assert(exists<T>());
             return to_json(object).dump();
         }
 
@@ -80,7 +80,7 @@ namespace mapping {
 
         template <class T>
         static JSON to_json(const T& object) {
-            static_assert(exists<T>);
+            static_assert(exists<T>());
 
             if constexpr (std::is_pointer_v<T>) {
                 if (object == nullptr) {
@@ -102,7 +102,7 @@ namespace mapping {
                     using ArrayValue = typename Property::Value::value_type;
                     json[property.name()] = JSON::array();
                     for (const auto& val : value) {
-                        if constexpr (exists<ArrayValue>) {
+                        if constexpr (exists<ArrayValue>()) {
                             json[property.name()].push_back(to_json(val));
                         }
                         else {
@@ -128,7 +128,7 @@ namespace mapping {
 
         template <class T>
         static T parse_json(const JSON& json) {
-            static_assert(exists<T>);
+            static_assert(exists<T>());
             T result = create_empty<T>();
             iterate_properties<T>([&](auto property) {
                 auto& value = property.get_reference(result);
@@ -172,7 +172,7 @@ namespace mapping {
                 using ArrayValue = typename Property::Value::value_type;
 
                 for (const auto& val : json_value) {
-                    if constexpr (exists<ArrayValue>) {
+                    if constexpr (exists<ArrayValue>()) {
                         member.push_back(parse_json<ArrayValue>(val));
                     }
                     else {
@@ -214,7 +214,9 @@ namespace mapping {
     public:
 
         template <class T>
-        static constexpr bool exists = mapper.template exists<T>;
+        static constexpr bool exists() {
+            return mapper.template exists<T>();
+        }
 
         template <class T, class Action>
         static constexpr void iterate_properties(Action action) {
@@ -235,7 +237,7 @@ namespace mapping {
     };
 
     template <class> struct is_json_mapper : std::false_type { };
-    template <auto m> struct is_json_mapper<JSONMapper<m>> : std::true_type { };
+    template <auto& m> struct is_json_mapper<JSONMapper<m>> : std::true_type { };
     template <class T> constexpr bool is_json_mapper_v = is_json_mapper<cu::remove_all_t<T>>::value;
 
     inline constexpr JSONMapper<empty_mapper> empty_json_mapper;
