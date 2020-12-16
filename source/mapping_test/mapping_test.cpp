@@ -31,7 +31,9 @@ MAKE_MAPPER(mapper,
             InfoOfTestClass
 );
 
+#ifdef USING_JSON
 constexpr auto json_mapper = mapping::JSONMapper<mapper>();
+#endif
 
 TestClass cl;
 
@@ -70,6 +72,8 @@ void mapping::test() {
     });
 
 
+#ifdef USING_JSON
     json_mapper.test(cl);
+#endif
 
 };

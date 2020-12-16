@@ -9,11 +9,13 @@
 #pragma once
 
 #include <iostream>
-#include <nlohmann/json.hpp>
 
 #include "Result.hpp"
 #include "Mapper.hpp"
+#include "JsonInclude.hpp"
 #include "ExceptionCatch.hpp"
+
+#ifdef USING_JSON
 
 namespace mapping {
 
@@ -228,3 +230,5 @@ namespace mapping {
     inline constexpr JSONMapper<empty_mapper> empty_json_mapper;
 
 }
+
+#endif

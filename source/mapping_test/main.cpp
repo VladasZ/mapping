@@ -49,7 +49,7 @@ int main() {
 
     infer_by_call(5);
 
-    //test();
+    test();
 
     // Log << json_mapper.to_json(Spec<int>());
 
