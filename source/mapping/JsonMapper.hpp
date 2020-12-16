@@ -21,16 +21,15 @@ namespace mapping {
 
     using JSON = nlohmann::json;
 
-    class is_json_mapper_cheker_base { };
-
     template <auto& _mapper>
-    class JSONMapper : is_json_mapper_cheker_base {
+    class JSONMapper {
 
     public:
 
-        using Mapper = cu::remove_all_t<decltype(_mapper)>;
-
         static constexpr bool check_for_input = false;
+
+
+        using Mapper = cu::remove_all_t<decltype(_mapper)>;
 
         static_assert(is_mapper_v<Mapper>);
 
@@ -46,25 +45,25 @@ namespace mapping {
             assert(json == new_json);
         }
 
-        template <class Class>
-        static cu::Result<Class> try_parse(const std::string& json) {
+        template <class T>
+        static cu::Result<T> try_parse(const std::string& json) {
             try {
-                return parse<Class>(json);
+                return parse<T>(json);
             }
             catch (...) {
                 return {};// what();
             }
         }
 
-        template <class Class>
-        static Class parse(const std::string& json) {
-            static_assert(exists<Class>);
-            return parse_json<Class>(JSON::parse(json));
+        template <class T>
+        static T parse(const std::string& json) {
+            static_assert(exists<T>);
+            return parse_json<T>(JSON::parse(json));
         }
 
-        template <class Class>
-        static std::string to_json_string(const Class& object) {
-            static_assert(exists<Class>);
+        template <class T>
+        static std::string to_json_string(const T& object) {
+            static_assert(exists<T>);
             return to_json(object).dump();
         }
 
@@ -79,19 +78,19 @@ namespace mapping {
             return result.dump();
         }
 
-        template <class Class>
-        static JSON to_json(const Class& object) {
-            static_assert(exists<Class>);
+        template <class T>
+        static JSON to_json(const T& object) {
+            static_assert(exists<T>);
 
-            if constexpr (std::is_pointer_v<Class>) {
+            if constexpr (std::is_pointer_v<T>) {
                 if (object == nullptr) {
                     return nullptr;
                 }
             }
 
             JSON json;
-            mapper.template iterate_properties<Class>([&](const auto& property) {
-                using Property = cu::remove_all_t<decltype(property)>;
+            iterate_properties<T>([&](auto property) {
+                using Property = decltype(property);
                 if constexpr (Property::is_secure) return;
                 const auto& value = Property::get_reference(object);
                 if constexpr (Property::ValueInfo::is_map_type) {
@@ -127,11 +126,11 @@ namespace mapping {
 
     public:
 
-        template <class Class>
-        static Class parse_json(const JSON& json) {
-            static_assert(exists<Class>);
-            Class result = mapper.template create_empty<Class>();
-            mapper.template iterate_properties<Class>([&](const auto& property) {
+        template <class T>
+        static T parse_json(const JSON& json) {
+            static_assert(exists<T>);
+            T result = create_empty<T>();
+            iterate_properties<T>([&](auto property) {
                 auto& value = property.get_reference(result);
                 _extract(value, property, json);
             });
@@ -214,18 +213,30 @@ namespace mapping {
 
     public:
 
-        template <class Class>
-        static constexpr bool exists = mapper.exists<Class>;
+        template <class T>
+        static constexpr bool exists = mapper.exists<T>;
 
-        template <class Class>
-        static void print(const Class& object) {
-            static_assert(exists<Class>);
+        template <class T, class Action>
+        static constexpr void iterate_properties(Action action) {
+            mapper.iterate_properties<T>(action);
+        }
+
+        template <class T>
+        static constexpr T create_empty() {
+            return mapper.create_empty<T>();
+        }
+
+        template <class T>
+        static void print(const T& object) {
+            static_assert(exists<T>);
             std::cout << to_json_string(object) << std::endl;
         }
 
     };
 
-    template <class T> constexpr bool is_json_mapper_v = std::is_base_of_v<is_json_mapper_cheker_base, cu::remove_all_t<T>>;
+    template <class> struct is_json_mapper : std::false_type { };
+    template <auto m> struct is_json_mapper<JSONMapper<m>> : std::true_type { };
+    template <class T> constexpr bool is_json_mapper_v = is_json_mapper<cu::remove_all_t<T>>::value;
 
     inline constexpr JSONMapper<empty_mapper> empty_json_mapper;
 

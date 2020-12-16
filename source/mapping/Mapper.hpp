@@ -55,8 +55,8 @@ namespace mapping {
             return result;
         }();
 
-        template <class T, class Class = std::remove_pointer_t<T>>
-        static constexpr auto info = std::get<_class_index<Class>>(classes);
+        template <class T>
+        static constexpr auto info = std::get<_class_index<T>>(classes);
 
         template <auto pointer, class Pointer = decltype(pointer), class Action>
         static constexpr void get_property(Action action) {
