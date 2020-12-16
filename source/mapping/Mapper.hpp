@@ -26,6 +26,45 @@ namespace mapping {
         using ClassesInfo = std::remove_reference_t<decltype(classes)>;
         static_assert(cu::is_tuple_v<ClassesInfo>);
 
+    private:
+
+        template <class T>
+        static constexpr int _class_index() {
+            static_assert(exists<T>);
+            int result = -1;
+            cu::indexed_iterate_tuple(classes, [&](auto index, auto info) {
+                if constexpr (cu::is_same_v<T, typename decltype(info)::Class>) {
+                    result = index;
+                }
+            });
+            return result;
+        };
+
+        template <class Class>
+        static constexpr Class _create_empty() {
+            static_assert(exists<Class>);
+            Class result;
+            iterate_properties<Class>([&](auto property) {
+                using Property = decltype(property);
+                using Value = typename Property::Value;
+                auto& reference = property.get_reference(result);
+                if constexpr (Property::ValueInfo::is_pointer) {
+                    static_assert(Property::ValueInfo::is_custom_type);
+                    reference = nullptr;
+                }
+                else {
+                    if constexpr (Property::ValueInfo::is_custom_type) {
+                        //fix
+                       // reference = This::template _create_empty<Value>();
+                    }
+                    else {
+                        reference = Value { };
+                    }
+                }
+            });
+            return result;
+        }
+
     public:
 
         constexpr explicit Mapper() {
@@ -34,7 +73,7 @@ namespace mapping {
 
         template <class T, class Action>
         static constexpr void iterate_properties(Action action) {
-            info<T>.iterate_properties(action);
+            info<T>().iterate_properties(action);
         }
 
         template <class Action>
@@ -56,12 +95,14 @@ namespace mapping {
         }();
 
         template <class T>
-        static constexpr auto info = std::get<_class_index<T>>(classes);
+        static constexpr auto info() {
+            return std::get<_class_index<T>()>(classes);
+        };
 
         template <auto pointer, class Pointer = decltype(pointer), class Class = cu::pointer_to_member_class_t<Pointer>>
         static constexpr auto property() {
             static_assert(exists<Class>);
-            return info<Class>.property<pointer>;
+            return info<Class>().template property<pointer>();
         }
 
         template <auto pointer>
@@ -98,43 +139,17 @@ namespace mapping {
             return pointer;
         }
 
-        template <class Class>
-        static constexpr Class _create_empty() {
-            static_assert(exists<Class>);
-            Class result;
-            iterate_properties<Class>([&](auto property) {
-                using Property = decltype(property);
-                using Value = typename Property::Value;
-                auto& reference = property.get_reference(result);
-                if constexpr (Property::ValueInfo::is_pointer) {
-                    static_assert(Property::ValueInfo::is_custom_type);
-                    reference = nullptr;
-                }
-                else {
-                    if constexpr (Property::ValueInfo::is_custom_type) {
-                        reference = _create_empty<Value>();
-                    }
-                    else {
-                        reference = Value { };
-                    }
-                }
-            });
-            return result;
-        }
-
     public:
 
         template <class Class>
         static constexpr bool has_id = []{
-            bool result = false;
-            get_class_info<Class>([&](auto class_info) { result = class_info.has_id; });
-            return result;
+            return info<Class>.has_id;
         }();
 
         template <class Class>
         static constexpr std::string_view class_name() {
             static_assert(exists<Class>);
-            return info<Class>.name;
+            return info<Class>().name;
         }
 
         template <class Class>
@@ -168,20 +183,6 @@ namespace mapping {
                 }
             });
             return true;
-        }();
-
-    private:
-
-        template <class T>
-        static constexpr int _class_index = [] {
-            static_assert(exists<T>);
-            int result = -1;
-            cu::indexed_iterate_tuple(classes, [&](auto index, auto info) {
-                if constexpr (cu::is_same_v<T, typename decltype(info)::Class>) {
-                    result = index;
-                }
-            });
-            return result;
         }();
 
     public:

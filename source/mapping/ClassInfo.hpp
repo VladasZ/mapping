@@ -17,7 +17,7 @@ namespace mapping {
 
     class is_class_info_cheker_base { };
 
-    template <class _Class, auto& properties>
+    template <class T, auto& properties>
     class ClassInfo final : is_class_info_cheker_base {
 
     private:
@@ -25,9 +25,28 @@ namespace mapping {
         using Properties = std::remove_reference_t<decltype(properties)>;
         static_assert(cu::is_tuple_v<Properties>);
 
+    private:
+
+        template <auto pointer, class Pointer = decltype(pointer)>
+        constexpr static int _property_index() {
+            using PointerInfo = cu::pointer_to_member_info<Pointer>;
+            static_assert(std::is_same_v<typename PointerInfo::Class, Class>);
+            int result = 0;
+            cu::indexed_iterate_tuple(properties, [&](auto index, auto property) {
+                using Property = decltype(property);
+                if constexpr (cu::is_same_v<Pointer, typename Property::Pointer>) {
+                    if constexpr (pointer == Property::pointer_to_member) {
+                        result = index;
+                    }
+                }
+            });
+            return result;
+        }
+
     public:
 
-        using Class = _Class;
+        using Class = T;
+        using This = ClassInfo<T, properties>;
 
         const std::string_view name;
 
@@ -52,12 +71,14 @@ namespace mapping {
             cu::iterate_tuple(properties, action);
         }
 
-        template <auto pointer, class Pointer = decltype(pointer)>
-        constexpr static auto property = std::get<_property_index<pointer>()>(properties);
+        template <auto pointer>
+        constexpr static auto property() {
+            return std::get<_property_index<pointer>()>(properties);
+        }
 
         template <auto pointer>
         constexpr static auto get_value(Class& obj) {
-            return property<pointer>.get_reference(obj);
+            return property<pointer>().get_reference(obj);
         }
 
         static constexpr bool has_id = [] {
@@ -78,22 +99,6 @@ namespace mapping {
             });
             return true;
         }();
-
-        template <auto pointer, class Pointer = decltype(pointer)>
-        constexpr static int _property_index() {
-            using PointerInfo = cu::pointer_to_member_info<Pointer>;
-            static_assert(std::is_same_v<typename PointerInfo::Class, Class>);
-            int result = 0;
-            cu::indexed_iterate_tuple(properties, [&](auto index, auto property) {
-                using Property = decltype(property);
-                if constexpr (cu::is_same_v<Pointer, typename Property::Pointer>) {
-                    if constexpr (pointer == Property::pointer_to_member) {
-                        result = index;
-                    }
-                }
-            });
-            return result;
-        }
 
     public:
 

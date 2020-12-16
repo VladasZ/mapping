@@ -214,16 +214,16 @@ namespace mapping {
     public:
 
         template <class T>
-        static constexpr bool exists = mapper.exists<T>;
+        static constexpr bool exists = mapper.template exists<T>;
 
         template <class T, class Action>
         static constexpr void iterate_properties(Action action) {
-            mapper.iterate_properties<T>(action);
+            mapper.template iterate_properties<T>(action);
         }
 
         template <class T>
         static constexpr T create_empty() {
-            return mapper.create_empty<T>();
+            return mapper.template create_empty<T>();
         }
 
         template <class T>
