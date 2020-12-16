@@ -105,17 +105,6 @@ namespace mapping {
             return info<Class>().template property<pointer>();
         }
 
-        template <auto pointer>
-        static std::string get_property_name() {
-            static constexpr auto p = property<pointer>();
-            if constexpr (p.is_id) {
-               return "rowid";
-            }
-            else {
-               return p.name();
-            }
-        }
-
     public:
 
         template <class Class>
@@ -150,6 +139,17 @@ namespace mapping {
         static constexpr std::string_view class_name() {
             static_assert(exists<Class>());
             return info<Class>().name;
+        }
+
+        template <auto pointer>
+        static std::string get_property_name() {
+            static constexpr auto p = property<pointer>();
+            if constexpr (p.is_id) {
+                return "rowid";
+            }
+            else {
+                return p.name();
+            }
         }
 
         template <class Class>
