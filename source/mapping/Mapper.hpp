@@ -58,25 +58,21 @@ namespace mapping {
         template <class T>
         static constexpr auto info = std::get<_class_index<T>>(classes);
 
-        template <auto pointer, class Pointer = decltype(pointer), class Action>
-        static constexpr void get_property(Action action) {
-            using Class = typename cu::pointer_to_member_class<Pointer>::type;
+        template <auto pointer, class Pointer = decltype(pointer), class Class = cu::pointer_to_member_class_t<Pointer>>
+        static constexpr auto property() {
             static_assert(exists<Class>);
-            info<Class>.get_property<pointer>(action);
+            return info<Class>.property<pointer>;
         }
 
         template <auto pointer>
         static std::string get_property_name() {
-            std::string result;
-            get_property<pointer>([&](auto property) {
-                if constexpr (property.is_id) {
-                    result = "rowid";
-                }
-                else {
-                    result = property.name();
-                }
-            });
-            return result;
+            static constexpr auto p = property<pointer>();
+            if constexpr (p.is_id) {
+               return "rowid";
+            }
+            else {
+               return p.name();
+            }
         }
 
     public:
@@ -136,12 +132,9 @@ namespace mapping {
         }();
 
         template <class Class>
-        static constexpr std::string_view get_class_name() {
-            std::string_view result;
-            get_class_info<Class>([&](auto info) {
-                result = info.name;
-            });
-            return result;
+        static constexpr std::string_view class_name() {
+            static_assert(exists<Class>);
+            return info<Class>.name;
         }
 
         template <class Class>

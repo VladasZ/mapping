@@ -7,6 +7,10 @@
 
 using namespace mapping;
 
+struct Unrelated {
+    int a;
+};
+
 MAKE_CLASS_INFO(TestMember,
                 MAKE_PROPERTY("a", &TestMember::c)
 , MAKE_PROPERTY("b", &TestMember::d)
@@ -59,18 +63,14 @@ void mapping::test() {
     cl.members_pointers.push_back(new TestMember { 5, 6 });
     cl.members_pointers.push_back(new TestMember { 7, 8 });
 
-    mapper.get_property<&TestClass::int_vector>([&](const auto& property) {
-        Log << property;
-    });
+    Log << "Class name" << mapper.class_name<TestClass>();
+    Logvar(mapper);
 
-    mapper.get_property<&TestClass::members>([&](const auto& property) {
-        Log << property;
-    });
+    Log << "Property name" << mapper.get_property_name<&TestClass::a>();
 
-    mapper.get_property<&TestClass::members_pointers>([&](const auto& property) {
-        Log << property;
-    });
-
+    Log << mapper.property<&TestClass::int_vector>();
+    Log << mapper.property<&TestClass::members>();
+    Log << mapper.property<&TestClass::members_pointers>();
 
 #ifdef USING_JSON
     json_mapper.test(cl);

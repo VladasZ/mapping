@@ -37,9 +37,6 @@ namespace mapping {
 
         using ValueInfo = cu::TypeInfo<typename PointerInfo::Value>;
 
-
-        static inline const auto class_name = cu::class_name<Class>;
-
         static constexpr auto pointer_to_member = _pointer_to_member;
 
         static constexpr bool is_id     = type == PropertyType::ID;
@@ -106,11 +103,15 @@ namespace mapping {
             return std::string(_name);
         }
 
+        static std::string class_name() {
+            return cu::class_name<Class>;
+        }
+
         std::string to_string() const {
             return std::string() + "\n" +
                 "Property: " + name() + "\n" +
                 "type: " + cu::class_name<Value> +"\n" +
-                "of class: " + class_name + "\n";
+                "of class: " + class_name() + "\n";
         }
 
         static_assert(is_valid);
