@@ -142,7 +142,7 @@ namespace mapping {
         }
 
         template <auto pointer>
-        static std::string get_property_name() {
+        static constexpr std::string_view property_name() {
             static constexpr auto p = property<pointer>();
             if constexpr (p.is_id) {
                 return "rowid";
@@ -197,7 +197,9 @@ namespace mapping {
 
     };
 
-    template <class T> constexpr bool is_mapper_v = std::is_base_of_v<is_mapper_cheker_base, cu::remove_all_t<T>>;
+    template <class  > struct is_mapper : std::false_type { };
+    template <auto& t> struct is_mapper<Mapper<t>> : std::true_type { };
+    template <class T> constexpr bool is_mapper_v = is_mapper<T>::value;
 
     inline constexpr std::tuple<> __empty_tuple;
     inline constexpr mapping::Mapper<__empty_tuple> empty_mapper;

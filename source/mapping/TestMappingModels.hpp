@@ -44,6 +44,21 @@ namespace mapping {
 
         std::vector<int> int_vector;
 
+        std::map<std::string, std::string> string_string_map = {
+            { "1", "10" },
+            { "2", "20" }
+        };
+
+        std::map<std::string, int> string_int_map = {
+           { "1", 10 },
+           { "2", 20 }
+        };
+
+        std::map<int, int> int_int_map = {
+           { 1, 10 },
+           { 2, 20 }
+        };
+
         TestMember member;
 
         TestMember* member_pointer = new TestMember();

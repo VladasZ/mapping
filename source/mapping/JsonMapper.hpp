@@ -94,8 +94,20 @@ namespace mapping {
                 if constexpr (Property::is_secure) return;
                 const auto& value = Property::get_reference(object);
                 if constexpr (Property::ValueInfo::is_map_type) {
+
+                    using Key = typename Property::Value::key_type;
+                    using KeyInfo = cu::TypeInfo<Key>;
+
                     for (const auto& [key, value] : value) {
-                        json[property.name()][key] = value;
+                        if constexpr (KeyInfo::is_string) {
+                            json[property.name()][key] = value;
+                        }
+                        else if constexpr (KeyInfo::is_integer) {
+                            json[property.name()][std::to_string(key)] = value;
+                        }
+                        else {
+                            static_assert(false, "Invalid map key type.");
+                        }
                     }
                 }
                 else if constexpr (Property::ValueInfo::is_array_type) {
@@ -152,31 +164,43 @@ namespace mapping {
                 if constexpr (Property::is_optional) {
                     return;
                 }
-                /*else if constexpr (property.is_id) {
+                else if constexpr (Property::is_id) {
                     member = -1;
                     return;
-                }*/
+                }
                 else {
-                    throw std::runtime_error(CU_LOG_LOCATION + " Failed to parse JSON for: " + property.to_string());
+                    Fatal("Failed to parse JSON for: " + property.to_string());
                 }
             }
 
             JSON json_value = json[property.name()];
 
             if constexpr (Property::ValueInfo::is_map_type) {
+
+                using Key   = typename Property::Value::key_type;
+                using KeyInfo = cu::TypeInfo<Key>;
+
                 for (const auto& value : json_value.get<JSON::object_t>()) {
-                    member[value.first] = value.second;
+                    if constexpr (KeyInfo::is_string) {
+                        member[value.first] = value.second;
+                    }
+                    else if constexpr (KeyInfo::is_integer) {
+                        member[std::stoi(value.first)] = value.second;
+                    }
+                    else {
+                        static_assert(false, "Invalid map key");
+                    }
                 }
             }
             else if constexpr (Property::ValueInfo::is_array_type) {
-                using ArrayValue = typename Property::Value::value_type;
+                using Value = typename Property::Value::value_type;
 
                 for (const auto& val : json_value) {
-                    if constexpr (exists<ArrayValue>()) {
-                        member.push_back(parse_json<ArrayValue>(val));
+                    if constexpr (exists<Value>()) {
+                        member.push_back(parse_json<Value>(val));
                     }
                     else {
-                        member.push_back(val.get<ArrayValue>());
+                        member.push_back(val.get<Value>());
                     }
                 }
             }

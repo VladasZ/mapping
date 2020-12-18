@@ -114,6 +114,12 @@ namespace mapping {
                 "of class: " + class_name() + "\n";
         }
 
+        static std::string static_to_string() {
+            return std::string() +
+                "type: " + cu::class_name<Value> +"\n" +
+                "of class: " + class_name() + "\n";
+        }
+
         static_assert(is_valid);
         static_assert(cu::is_pointer_to_member_v<Pointer>);
 

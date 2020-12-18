@@ -17,17 +17,20 @@ MAKE_CLASS_INFO(TestMember,
 );
 
 MAKE_CLASS_INFO(TestClass,
-                MAKE_PROPERTY("a",                   &TestClass::a),
-                MAKE_PROPERTY("b",                   &TestClass::b),
-                MAKE_PROPERTY("lett",                &TestClass::lett),
-                MAKE_PROPERTY("enum",                &TestClass::enum_value),
-                MAKE_PROPERTY("enum_class",          &TestClass::enum_class_value),
-                MAKE_PROPERTY("int_vector",          &TestClass::int_vector),
-                MAKE_PROPERTY("member",              &TestClass::member),
-                //MAKE_PROPERTY("member_pointer",      &TestClass::member_pointer),
-                MAKE_PROPERTY("null_member_pointer", &TestClass::null_member_pointer),
-                MAKE_PROPERTY("members",             &TestClass::members)//,
-              //  MAKE_PROPERTY("members_pointers",    &TestClass::members_pointers)
+    MAKE_PROPERTY("a", &TestClass::a),
+    MAKE_PROPERTY("b", &TestClass::b),
+    MAKE_PROPERTY("lett", &TestClass::lett),
+    MAKE_PROPERTY("enum", &TestClass::enum_value),
+    MAKE_PROPERTY("enum_class", &TestClass::enum_class_value),
+    MAKE_PROPERTY("int_vector", &TestClass::int_vector),
+    MAKE_PROPERTY("string_string_map", &TestClass::string_string_map),
+    MAKE_PROPERTY("string_int_map", &TestClass::string_int_map),
+    MAKE_PROPERTY("int_int_map", &TestClass::int_int_map),
+    MAKE_PROPERTY("member", &TestClass::member),
+    //MAKE_PROPERTY("member_pointer",      &TestClass::member_pointer),
+    MAKE_PROPERTY("null_member_pointer", &TestClass::null_member_pointer),
+    MAKE_PROPERTY("members", &TestClass::members)//,
+  //  MAKE_PROPERTY("members_pointers",    &TestClass::members_pointers)
 );
 
 MAKE_MAPPER(mapper,
@@ -66,7 +69,7 @@ void mapping::test() {
     Log << "Class name" << mapper.class_name<TestClass>();
     Logvar(mapper);
 
-    Log << "Property name" << mapper.get_property_name<&TestClass::a>();
+    Log << "Property name" << mapper.property_name<&TestClass::a>();
 
     Log << mapper.property<&TestClass::int_vector>();
     Log << mapper.property<&TestClass::members>();
