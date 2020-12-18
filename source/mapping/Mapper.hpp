@@ -105,6 +105,17 @@ namespace mapping {
             return info<Class>().template property<pointer>();
         }
 
+        template <class Class, const std::string_view& name>
+        static constexpr auto property_by_name() {
+            static_assert(exists<Class>());
+            return info<Class>().template property_by_name<name>();
+        }
+
+        template <const std::string_view& name, class Class>
+        static constexpr auto value_by_name(const Class& object) {
+            return property_by_name<Class, name>().get_value(object);
+        }
+
     public:
 
         template <class Class>

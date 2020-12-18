@@ -11,6 +11,15 @@ struct Unrelated {
     int a;
 };
 
+struct Macbook {
+    int price;
+    constexpr Macbook(int price) : price(price) { }
+};
+
+MAKE_CLASS_INFO(Macbook,
+    MAKE_PROPERTY("price", &Macbook::price)
+);
+
 MAKE_CLASS_INFO(TestMember,
                 MAKE_PROPERTY("a", &TestMember::c)
 , MAKE_PROPERTY("b", &TestMember::d)
@@ -34,6 +43,7 @@ MAKE_CLASS_INFO(TestClass,
 );
 
 MAKE_MAPPER(mapper,
+            InfoOfMacbook,
             InfoOfTestMember,
             InfoOfTestClass
 );
@@ -43,6 +53,17 @@ constexpr auto json_mapper = mapping::JSONMapper<mapper>();
 #endif
 
 TestClass cl;
+
+static constexpr const std::string_view& b_string = "b";
+
+
+//Limited by the technology of my time
+static constexpr const std::string_view& price_string = "price";
+
+static constexpr Macbook makbok = Macbook(999999959);
+
+static_assert(mapper.value_by_name<price_string>(makbok) == 999999959);
+
 
 
 void mapping::test() {
@@ -73,7 +94,15 @@ void mapping::test() {
 
     Log << mapper.property<&TestClass::int_vector>();
     Log << mapper.property<&TestClass::members>();
-    Log << mapper.property<&TestClass::members_pointers>();
+
+
+
+    Log << mapper.property_by_name<TestClass, b_string>();
+
+    Log << mapper.value_by_name<b_string>(cl);
+
+
+    Log << mapper;
 
 #ifdef USING_JSON
     json_mapper.test(cl);

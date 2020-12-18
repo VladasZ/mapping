@@ -39,7 +39,7 @@ namespace mapping {
 
         static constexpr auto pointer_to_member = _pointer_to_member;
 
-        static constexpr bool is_id     = type == PropertyType::ID;
+        static constexpr bool is_id = type == PropertyType::ID;
         static constexpr bool is_secure = type == PropertyType::Secure;
         static constexpr bool is_unique = type == PropertyType::Unique;
 
@@ -123,9 +123,9 @@ namespace mapping {
         static_assert(is_valid);
         static_assert(cu::is_pointer_to_member_v<Pointer>);
 
-        private:
+    public:
 
-            const std::string_view _name;
+        const std::string_view _name;
 
     };
 

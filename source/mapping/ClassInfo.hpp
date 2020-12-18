@@ -31,13 +31,25 @@ namespace mapping {
         constexpr static int _property_index() {
             using PointerInfo = cu::pointer_to_member_info<Pointer>;
             static_assert(std::is_same_v<typename PointerInfo::Class, Class>);
-            int result = 0;
+            int result = -1;
             cu::indexed_iterate_tuple(properties, [&](auto index, auto property) {
                 using Property = decltype(property);
                 if constexpr (cu::is_same_v<Pointer, typename Property::Pointer>) {
                     if constexpr (pointer == Property::pointer_to_member) {
                         result = index;
                     }
+                }
+            });
+            return result;
+        }
+
+        template <const std::string_view& name>
+        constexpr static int _property_by_name_index() {
+            int result = -1;
+            cu::indexed_iterate_tuple(properties, [&](auto index, auto property) {
+                using Property = decltype(property);
+                if (name == property._name) {
+                    result = index;
                 }
             });
             return result;
@@ -69,6 +81,11 @@ namespace mapping {
         template <class Action>
         constexpr static void iterate_properties(Action action) {
             cu::iterate_tuple(properties, action);
+        }
+
+        template <const std::string_view& name>
+        constexpr static auto property_by_name() {
+            return std::get<_property_by_name_index<name>()>(properties);
         }
 
         template <auto pointer>
