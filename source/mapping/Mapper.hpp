@@ -162,7 +162,7 @@ namespace mapping {
 
         template <auto pointer>
         static constexpr std::string_view property_name() {
-            static constexpr auto p = property<pointer>();
+            constexpr auto p = property<pointer>();
             if constexpr (p.is_id) {
                 return "rowid";
             }

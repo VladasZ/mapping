@@ -28,7 +28,6 @@ namespace mapping {
 
         static constexpr bool check_for_input = false;
 
-
         using Mapper = cu::remove_all_t<decltype(_mapper)>;
 
         static_assert(is_mapper_v<Mapper>);
