@@ -17,29 +17,29 @@ struct Macbook {
 };
 
 MAKE_CLASS_INFO(Macbook,
-    MAKE_PROPERTY("price", &Macbook::price)
+    MAKE_PROPERTY(Macbook, price)
 );
 
 MAKE_CLASS_INFO(TestMember,
-                MAKE_PROPERTY("a", &TestMember::c)
-, MAKE_PROPERTY("b", &TestMember::d)
+    MAKE_PROPERTY(TestMember, c),
+    MAKE_PROPERTY(TestMember, d)
 );
 
 MAKE_CLASS_INFO(TestClass,
-    MAKE_PROPERTY("a", &TestClass::a),
-    MAKE_PROPERTY("b", &TestClass::b),
-    MAKE_PROPERTY("lett", &TestClass::lett),
-    MAKE_PROPERTY("enum", &TestClass::enum_value),
-    MAKE_PROPERTY("enum_class", &TestClass::enum_class_value),
-    MAKE_PROPERTY("int_vector", &TestClass::int_vector),
-    MAKE_PROPERTY("string_string_map", &TestClass::string_string_map),
-    MAKE_PROPERTY("string_int_map", &TestClass::string_int_map),
-    MAKE_PROPERTY("int_int_map", &TestClass::int_int_map),
-    MAKE_PROPERTY("member", &TestClass::member),
-    //MAKE_PROPERTY("member_pointer",      &TestClass::member_pointer),
-    MAKE_PROPERTY("null_member_pointer", &TestClass::null_member_pointer),
-    MAKE_PROPERTY("members", &TestClass::members)//,
-  //  MAKE_PROPERTY("members_pointers",    &TestClass::members_pointers)
+    MAKE_PROPERTY(TestClass, a),
+    MAKE_PROPERTY(TestClass, b),
+    MAKE_PROPERTY(TestClass, lett),
+    MAKE_PROPERTY(TestClass, enum_value),
+    MAKE_PROPERTY(TestClass, enum_class_value),
+    MAKE_PROPERTY(TestClass, int_vector),
+    MAKE_PROPERTY(TestClass, string_string_map),
+    MAKE_PROPERTY(TestClass, string_int_map),
+    MAKE_PROPERTY(TestClass, int_int_map),
+    MAKE_PROPERTY(TestClass, member),
+    //MAKE_PROPERTYTestClass, member_pointer),
+    MAKE_PROPERTY(TestClass, null_member_pointer),
+    MAKE_PROPERTY(TestClass, members)//,
+  //  MAKE_PROPERTY(TestClass, members_pointers)
 );
 
 MAKE_MAPPER(mapper,

@@ -13,10 +13,10 @@ public:
 };
 
 template <class T>
-constexpr auto t_a = mapping::Property<&Spec<T>::a>("a");
+constexpr auto t_a = mapping::Property<&Spec<T>::a>("a", "Spec");
 
 template <class T>
-constexpr auto t_b = mapping::Property<&Spec<T>::a>("b");
+constexpr auto t_b = mapping::Property<&Spec<T>::a>("b", "Spec");
 
 template <class T>
 constexpr auto properties_of_Spec = std::make_tuple(t_a<T>, t_b<T>);

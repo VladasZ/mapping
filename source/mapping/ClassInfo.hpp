@@ -79,6 +79,15 @@ namespace mapping {
             });
         }
 
+        template <class Class, class Action>
+        constexpr static void properties_of_type(Action action) {
+            properties([&](auto prop) {
+                using Val = typename decltype(prop)::Value;
+                if constexpr (std::is_same_v<Class, Val>)
+                    action(prop);
+            });
+        }
+
         template <const std::string_view& name>
         constexpr static auto property_by_name() {
             return std::get<_property_by_name_index<name>()>(_properties);
@@ -127,9 +136,6 @@ namespace mapping {
         std::string to_string() const {
             std::string result = std::string(name) + "\n";
             result += std::string() + "has custom props: " + (has_custom_property ? "true" : "false") + "\n";
-            properties([&](auto prop) {
-                result += prop.to_string() + "\n";
-            });
             return result;
         }
 

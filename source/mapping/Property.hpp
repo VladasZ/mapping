@@ -13,6 +13,7 @@
 #include "Log.hpp"
 #include "TypeInfo.hpp"
 
+
 namespace mapping {
 
     using ID = int;
@@ -72,7 +73,7 @@ namespace mapping {
             }
         }();
 
-        explicit constexpr Property(const std::string_view& name) : _name(name) { }
+        explicit constexpr Property(const std::string_view& name, const std::string_view& class_name) : _name(name), _class_name(class_name) { }
 
         template <class T>
         static constexpr auto& get_value(T& object) {
@@ -103,21 +104,20 @@ namespace mapping {
             return std::string(_name);
         }
 
-        static std::string class_name() {
-            return cu::class_name<Class>;
+        std::string class_name() const {
+            return std::string(_class_name);
         }
 
         std::string to_string() const {
             return std::string() + "\n" +
                 "Property: " + name() + "\n" +
-                "type: " + cu::class_name<Value> +"\n" +
+                "type: " + cu::class_name<Value>() +"\n" +
                 "of class: " + class_name() + "\n";
         }
 
-        static std::string static_to_string() {
+        std::string foreign_key() {
             return std::string() +
-                "type: " + cu::class_name<Value> +"\n" +
-                "of class: " + class_name() + "\n";
+               class_name() + "_" + name() + "_id";
         }
 
         static_assert(is_valid);
@@ -126,6 +126,7 @@ namespace mapping {
     public:
 
         const std::string_view _name;
+        const std::string_view _class_name;
 
     };
 
@@ -136,6 +137,6 @@ namespace mapping {
 
 }
 
-#define MAKE_PROPERTY(name, pointer) mapping::Property<pointer>(name)
-#define MAKE_ID_PROPERTY(pointer) mapping::Property<pointer, mapping::PropertyType::ID>("id")
-#define MAKE_SECURE_PROPERTY(name, pointer) mapping::Property<pointer, mapping::PropertyType::Secure>(name)
+#define MAKE_PROPERTY(type, name) mapping::Property<&type::name>(#name, #type)
+#define MAKE_ID_PROPERTY(type, name) mapping::Property<&type::name, mapping::PropertyType::ID>("id", #type)
+#define MAKE_SECURE_PROPERTY(type, name) mapping::Property<&type::name, mapping::PropertyType::Secure>(#name, #type)
