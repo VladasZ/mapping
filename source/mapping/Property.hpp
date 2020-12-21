@@ -15,7 +15,7 @@
 
 namespace mapping {
 
-    using ID = unsigned;
+    using ID = int;
 
     enum class PropertyType {
         None,
@@ -51,7 +51,7 @@ namespace mapping {
 
         static constexpr bool is_valid = [] {
             if constexpr (is_id) {
-                static_assert(std::is_same_v<Value, ID>, "ID propery must be of unsigned type.");
+                static_assert(std::is_same_v<Value, ID>, "ID propery must be of int type.");
             }
             if constexpr (ValueInfo::is_base_type) {
                 static_assert(!ValueInfo::is_pointer);

@@ -1,7 +1,7 @@
 
 #include "Mapper.hpp"
 #include "JsonMapper.hpp"
-#include "TestMappingModels.hpp"
+#include "TestMappingModel.hpp"
 
 #include "mapping_test.hpp"
 

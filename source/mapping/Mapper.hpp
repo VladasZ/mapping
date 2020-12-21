@@ -18,12 +18,12 @@ namespace mapping {
 
     class is_mapper_cheker_base { };
 
-    template <auto& classes>
+    template <auto& _classes>
     class Mapper : is_mapper_cheker_base {
 
-        using This = Mapper<classes>;
+        using This = Mapper<_classes>;
 
-        using ClassesInfo = std::remove_reference_t<decltype(classes)>;
+        using ClassesInfo = std::remove_reference_t<decltype(_classes)>;
         static_assert(cu::is_tuple_v<ClassesInfo>);
 
     private:
@@ -32,7 +32,7 @@ namespace mapping {
         static constexpr int _class_index() {
             static_assert(exists<T>());
             int result = -1;
-            cu::indexed_iterate_tuple(classes, [&](auto index, auto info) {
+            cu::indexed_iterate_tuple(_classes, [&](auto index, auto info) {
                 if constexpr (cu::is_same_v<T, typename decltype(info)::Class>) {
                     result = index;
                 }
@@ -44,7 +44,7 @@ namespace mapping {
         static constexpr Class _create_empty() {
             static_assert(exists<Class>());
             Class result;
-            iterate_properties<Class>([&](auto property) {
+            properties<Class>([&](auto property) {
                 using Property = decltype(property);
                 using Value = typename Property::Value;
                 auto& reference = property.get_reference(result);
@@ -72,20 +72,28 @@ namespace mapping {
         }
 
         template <class T, class Action>
-        static constexpr void iterate_properties(Action action) {
-            info<T>().iterate_properties(action);
+        static constexpr void properties(Action action) {
+            info<T>().properties(action);
         }
 
         template <class Action>
-        static constexpr void iterate_classes(Action action) {
-            cu::iterate_tuple(classes, action);
+        static constexpr void classes(Action action) {
+            cu::iterate_tuple(_classes, action);
+        }
+
+        template <class Action>
+        static constexpr void classes_with_custom_members(Action action) {
+            classes([&](auto info) {
+                if constexpr (decltype(info)::has_custom_property)
+                    action(info);
+            });
         }
 
         template <class T>
         static constexpr bool exists() {
             bool result = false;
             using Class = std::remove_pointer_t<T>;
-            iterate_classes([&](auto val) {
+            classes([&](auto val) {
                 using Info = decltype(val);
                 if constexpr (cu::is_same_v<Class, typename Info::Class>) {
                     result = true;
@@ -96,7 +104,7 @@ namespace mapping {
 
         template <class T>
         static constexpr auto info() {
-            return std::get<_class_index<T>()>(classes);
+            return std::get<_class_index<T>()>(_classes);
         };
 
         template <auto pointer, class Pointer = decltype(pointer), class Class = cu::pointer_to_member_class_t<Pointer>>
@@ -167,7 +175,7 @@ namespace mapping {
         static constexpr bool is_equals(const Class& a, const Class& b) {
             static_assert(exists<Class>);
             bool result = true;
-            iterate_properties<Class>([&](auto property) {
+            properties<Class>([&](auto property) {
                 if (a.*property.pointer != b.*property.pointer) {
                     result = false;
                 }
@@ -180,11 +188,11 @@ namespace mapping {
         //MARK: - Tuple Check
 
         static constexpr bool _classes_info_is_valid = [] {
-            iterate_classes([&](auto class_info) {
+            classes([&](auto class_info) {
                 using ClassInfo = decltype(class_info);
                 static_assert(is_class_info_v<ClassInfo>);
-                if constexpr (ClassInfo::has_custom_properties) {
-                    ClassInfo::iterate_properties([](auto property) {
+                if constexpr (ClassInfo::has_custom_property) {
+                    ClassInfo::properties([](auto property) {
                         using Property = decltype(property);
                         if constexpr (Property::ValueInfo::is_custom_type) {
                             using Value = typename Property::Value;
@@ -200,7 +208,7 @@ namespace mapping {
 
         std::string to_string() const {
             std::string result;
-            iterate_classes([&](const auto& info) {
+            classes([&](const auto& info) {
                 result += info.to_string() + "\n";
             });
             return result;

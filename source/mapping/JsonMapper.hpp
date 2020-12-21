@@ -89,7 +89,7 @@ namespace mapping {
             }
 
             JSON json;
-            iterate_properties<T>([&](auto property) {
+            properties<T>([&](auto property) {
                 using Property = decltype(property);
                 if constexpr (Property::is_secure) return;
                 const auto& value = Property::get_reference(object);
@@ -142,7 +142,7 @@ namespace mapping {
         static T parse_json(const JSON& json) {
             static_assert(exists<T>());
             T result = create_empty<T>();
-            iterate_properties<T>([&](auto property) {
+            properties<T>([&](auto property) {
                 auto& value = property.get_reference(result);
                 _extract(value, property, json);
             });
@@ -243,8 +243,8 @@ namespace mapping {
         }
 
         template <class T, class Action>
-        static constexpr void iterate_properties(Action action) {
-            mapper.template iterate_properties<T>(action);
+        static constexpr void properties(Action action) {
+            mapper.template properties<T>(action);
         }
 
         template <class T>
