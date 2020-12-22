@@ -46,6 +46,9 @@ namespace mapping {
 
         static constexpr bool is_optional = optional;
 
+        static constexpr bool is_container = ValueInfo::is_std_vector;
+
+
         template <class T>
         static constexpr bool is_related_class =
             cu::is_same_v<T, Class> || cu::is_base_of_v<Class, T>;
