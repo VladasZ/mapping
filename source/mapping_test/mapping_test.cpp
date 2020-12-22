@@ -90,7 +90,7 @@ void mapping::test() {
     Log << "Class name" << mapper.class_name<TestClass>();
     Logvar(mapper);
 
-    Log << "Property name" << mapper.property_name<&TestClass::a>();
+    Log << "Property name" << mapper.property<&TestClass::a>().name();
 
     Log << mapper.property<&TestClass::int_vector>();
     Log << mapper.property<&TestClass::members>();

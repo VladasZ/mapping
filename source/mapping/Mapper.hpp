@@ -160,17 +160,6 @@ namespace mapping {
             return info<Class>().name;
         }
 
-        template <auto pointer>
-        static constexpr std::string_view property_name() {
-            constexpr auto p = property<pointer>();
-            if constexpr (p.is_id) {
-                return "rowid";
-            }
-            else {
-                return p.name();
-            }
-        }
-
         template <class Class>
         static constexpr bool is_equals(const Class& a, const Class& b) {
             static_assert(exists<Class>);
