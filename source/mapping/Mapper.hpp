@@ -104,6 +104,7 @@ namespace mapping {
 
         template <class T>
         static constexpr auto info() {
+            static_assert(exists<T>());
             return std::get<_class_index<T>()>(_classes);
         };
 

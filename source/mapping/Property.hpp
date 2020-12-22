@@ -73,6 +73,20 @@ namespace mapping {
             }
         }();
 
+        static constexpr bool is_mappable() {
+            if constexpr (ValueInfo::is_custom_type) {
+                return true;
+            }
+            else if constexpr (ValueInfo::is_std_vector) {
+                using ArrayValue = typename ValueInfo::Class::value_type;
+                using ArrayValueInfo = cu::TypeInfo<ArrayValue>;
+                return ArrayValueInfo::is_custom_type;
+            }
+            else {
+                return false;
+            }
+        }
+
         explicit constexpr Property(const std::string_view& name, const std::string_view& class_name) : _name(name), _class_name(class_name) { }
 
         template <class T>

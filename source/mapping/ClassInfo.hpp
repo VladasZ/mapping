@@ -73,9 +73,9 @@ namespace mapping {
 
         template <class Action>
         constexpr static void mappable_properties(Action action) {
-            properties([&](auto property) {
-                if constexpr (decltype(property)::ValueInfo::is_custom_type)
-                    action(property);
+            properties([&](auto prop) {
+                if constexpr (prop.is_mappable())
+                    action(prop);
             });
         }
 
@@ -127,7 +127,7 @@ namespace mapping {
         static constexpr bool has_custom_property = [] {
             bool result = false;
             properties([&](auto prop) {
-                if constexpr (decltype(prop)::ValueInfo::is_custom_type)
+                if constexpr (prop.is_mappable())
                     result = true;
             });
             return result;
