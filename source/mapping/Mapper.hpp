@@ -152,7 +152,7 @@ namespace mapping {
 
         template <class Class>
         static constexpr bool has_id = []{
-            return info<Class>.has_id;
+            return info<Class>().has_id;
         }();
 
         template <class Class>
