@@ -94,6 +94,8 @@ namespace mapping {
                 const auto& value = Property::get_reference(object);
                 if constexpr (Property::ValueInfo::is_map_type) {
 
+                    static_assert(false, "Map is not supported yet");
+
                     using Key = typename Property::Value::key_type;
                     using KeyInfo = cu::TypeInfo<Key>;
 
@@ -175,6 +177,8 @@ namespace mapping {
             JSON json_value = json[property.name()];
 
             if constexpr (Property::ValueInfo::is_map_type) {
+
+                static_assert(false, "Map is not supported yet");
 
                 using Key   = typename Property::Value::key_type;
                 using KeyInfo = cu::TypeInfo<Key>;
