@@ -21,8 +21,10 @@ namespace mapping {
 
     using JSON = nlohmann::json;
 
+    class is_json_mapper_checker_base { };
+
     template <auto& _mapper>
-    class JSONMapper {
+    class JSONMapper : is_json_mapper_checker_base {
 
     public:
 
@@ -94,7 +96,7 @@ namespace mapping {
                 const auto& value = Property::get_reference(object);
                 if constexpr (Property::ValueInfo::is_map_type) {
 
-                    static_assert(false, "Map is not supported yet");
+                    using spes = typename Property::MapIsNotSupportedYet;
 
                     using Key = typename Property::Value::key_type;
                     using KeyInfo = cu::TypeInfo<Key>;
@@ -107,7 +109,7 @@ namespace mapping {
                             json[property.name()][std::to_string(key)] = value;
                         }
                         else {
-                            static_assert(false, "Invalid map key type.");
+                           // static_assert(false, "Invalid map key type.");
                         }
                     }
                 }
@@ -178,7 +180,7 @@ namespace mapping {
 
             if constexpr (Property::ValueInfo::is_map_type) {
 
-                static_assert(false, "Map is not supported yet");
+                using spes = typename Property::MapIsNotSupportedYet;
 
                 using Key   = typename Property::Value::key_type;
                 using KeyInfo = cu::TypeInfo<Key>;
@@ -191,7 +193,7 @@ namespace mapping {
                         member[std::stoi(value.first)] = value.second;
                     }
                     else {
-                        static_assert(false, "Invalid map key");
+                        //static_assert(false, "Invalid map key");
                     }
                 }
             }
@@ -263,9 +265,7 @@ namespace mapping {
 
     };
 
-    template <class> struct is_json_mapper : std::false_type { };
-    template <auto& m> struct is_json_mapper<JSONMapper<m>> : std::true_type { };
-    template <class T> constexpr bool is_json_mapper_v = is_json_mapper<cu::remove_all_t<T>>::value;
+    template <class T> constexpr bool is_json_mapper_v = std::is_base_of_v<is_json_mapper_checker_base, cu::remove_all_t<T>>;
 
     inline constexpr JSONMapper<empty_mapper> empty_json_mapper;
 

@@ -206,9 +206,7 @@ namespace mapping {
 
     };
 
-    template <class  > struct is_mapper : std::false_type { };
-    template <auto& t> struct is_mapper<Mapper<t>> : std::true_type { };
-    template <class T> constexpr bool is_mapper_v = is_mapper<T>::value;
+    template <class T> constexpr bool is_mapper_v = std::is_base_of_v<is_mapper_cheker_base, cu::remove_all_t<T>>;
 
     inline constexpr std::tuple<> __empty_tuple;
     inline constexpr mapping::Mapper<__empty_tuple> empty_mapper;
