@@ -33,6 +33,7 @@ namespace mapping {
     enum class TestEnumClass { c = 10, d = 20 };
 
     class TestClass {
+
     public:
 
         int a;
@@ -82,6 +83,12 @@ namespace mapping {
 
         std::string to_string() const { return VarString(a) + " " + VarString(b) + " " + VarString(lett) + " " + VarString(member_pointer->to_string());
         }
+
+        int get_private_int() { return _private_int; }
+        void set_private_int(int value) { _private_int = value; }
+    private:
+
+        int _private_int = 555;
     };
 
 }
