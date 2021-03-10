@@ -7,19 +7,6 @@
 
 using namespace mapping;
 
-struct Unrelated {
-    int a;
-};
-
-struct Macbook {
-    int price;
-    constexpr Macbook(int price) : price(price) { }
-};
-
-MAKE_CLASS_INFO(Macbook,
-    MAKE_PROPERTY(Macbook, price)
-);
-
 MAKE_CLASS_INFO(TestMember,
     MAKE_PROPERTY(TestMember, c),
     MAKE_PROPERTY(TestMember, d)
@@ -37,13 +24,12 @@ MAKE_CLASS_INFO(TestClass,
  //   MAKE_PROPERTY(TestClass, int_int_map),
     MAKE_PROPERTY(TestClass, member),
     //MAKE_PROPERTYTestClass, member_pointer),
-    MAKE_PROPERTY(TestClass, null_member_pointer),
+  //  MAKE_PROPERTY(TestClass, null_member_pointer),
     MAKE_PROPERTY(TestClass, members)//,
   //  MAKE_PROPERTY(TestClass, members_pointers)
 );
 
 MAKE_MAPPER(mapper,
-            InfoOfMacbook,
             InfoOfTestMember,
             InfoOfTestClass
 );
@@ -56,6 +42,14 @@ TestClass cl;
 
 
 void mapping::test() {
+
+
+    auto getter = &TestClass::get_private_int;
+    auto setter = &TestClass::set_private_int;
+
+    Log << (cl.*getter)();
+    (cl.*setter)(444343);
+    Log << (cl.*getter)();
 
     cl.a = 10;
     cl.b = 20;

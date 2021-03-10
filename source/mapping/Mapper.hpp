@@ -47,10 +47,9 @@ namespace mapping {
             properties<Class>([&](auto property) {
                 using Property = decltype(property);
                 using Value = typename Property::Value;
-                auto& reference = property.get_reference(result);
                 if constexpr (Property::ValueInfo::is_pointer) {
                     static_assert(Property::ValueInfo::is_custom_type);
-                    reference = nullptr;
+                    property.get_reference(result) = nullptr;
                 }
                 else {
                     if constexpr (Property::ValueInfo::is_custom_type) {
@@ -58,7 +57,7 @@ namespace mapping {
                        // reference = This::template _create_empty<Value>();
                     }
                     else {
-                        reference = Value { };
+                        property.set_value(result, { });
                     }
                 }
             });

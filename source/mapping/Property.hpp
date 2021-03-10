@@ -25,7 +25,12 @@ namespace mapping {
         Unique
     };
 
-    template<auto _pointer_to_member, PropertyType type = PropertyType::None, bool optional = false>
+    template<auto _pointer_to_member,
+            PropertyType type = PropertyType::None,
+            bool optional = false,
+            auto getter = int { },
+            auto setter = int { }>
+
     class Property {
 
     public:
@@ -48,6 +53,10 @@ namespace mapping {
 
         static constexpr bool is_container = ValueInfo::is_std_vector;
 
+        using Getter = decltype(getter);
+        using Setter = decltype(setter);
+
+        static constexpr bool get_set = !cu::is_int<Getter> && !cu::is_int<Getter>;
 
         template <class T>
         static constexpr bool is_related_class =
@@ -92,28 +101,21 @@ namespace mapping {
 
         explicit constexpr Property(const std::string_view& name, const std::string_view& class_name) : _name(name), _class_name(class_name) { }
 
-        template <class T>
-        static constexpr auto& get_value(T& object) {
-            static_assert(is_related_class<T>);
-            if constexpr (std::is_pointer_v<T>) {
-                return get_value(*object);
-            }
-            else if constexpr (ValueInfo::is_pointer) {
-                return *(object.*pointer_to_member);
+        static constexpr const Value& get_value(const Class& object) {
+            if constexpr (get_set) {
+                return (object.*pointer_to_member)();
             }
             else {
                 return object.*pointer_to_member;
             }
         }
 
-        template <class T>
-        static constexpr auto& get_reference(T& object) {
-            static_assert(is_related_class<T>);
-            if constexpr (std::is_pointer_v<T>) {
-                return get_reference(*object);
+        static constexpr void set_value(Class& object, const Value& value) {
+            if constexpr (get_set) {
+                return (object.*pointer_to_member)(value);
             }
             else {
-                return object.*pointer_to_member;
+                object.*pointer_to_member = value;
             }
         }
 

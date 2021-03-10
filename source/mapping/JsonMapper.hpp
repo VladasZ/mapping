@@ -93,7 +93,7 @@ namespace mapping {
             properties<T>([&](auto property) {
                 using Property = decltype(property);
                 if constexpr (Property::is_secure) return;
-                const auto& value = Property::get_reference(object);
+
                 if constexpr (Property::ValueInfo::is_map_type) {
 
                     using spes = typename Property::MapIsNotSupportedYet;
@@ -101,7 +101,7 @@ namespace mapping {
                     using Key = typename Property::Value::key_type;
                     using KeyInfo = cu::TypeInfo<Key>;
 
-                    for (const auto& [key, value] : value) {
+                    for (const auto& [key, value] : Property::get_value(object)) {
                         if constexpr (KeyInfo::is_string) {
                             json[property.name()][key] = value;
                         }
@@ -116,7 +116,7 @@ namespace mapping {
                 else if constexpr (Property::ValueInfo::is_array_type) {
                     using ArrayValue = typename Property::Value::value_type;
                     json[property.name()] = JSON::array();
-                    for (const auto& val : value) {
+                    for (const auto& val : Property::get_value(object)) {
                         if constexpr (exists<ArrayValue>()) {
                             json[property.name()].push_back(to_json(val));
                         }
@@ -126,10 +126,10 @@ namespace mapping {
                     }
                 }
                 else if constexpr (Property::ValueInfo::is_base_type) {
-                    json[property.name()] = value;
+                    json[property.name()] = Property::get_value(object);
                 }
                 else {
-                    json[property.name()] = to_json(value);
+                    json[property.name()] = to_json(Property::get_value(object));
                 }
 //                else {
 //                    static_assert(false);
@@ -146,16 +146,17 @@ namespace mapping {
             static_assert(exists<T>());
             T result = create_empty<T>();
             properties<T>([&](auto property) {
-                auto& value = property.get_reference(result);
-                _extract(value, property, json);
+                _extract(result, property, json);
             });
             return result;
         }
 
     private:
 
-        template <class Member, class Property>
-        static void _extract(Member& member, const Property& property, const JSON& json) {
+        template <class Property,
+                  class Class = typename Property::Class,
+                  class Value = typename Property::Value>
+        static void _extract(Class& object, const Property& property, const JSON& json) {
 
             if constexpr (check_for_input) {
                 check_input(property.name());
@@ -168,7 +169,7 @@ namespace mapping {
                     return;
                 }
                 else if constexpr (Property::is_id) {
-                    member = -1;
+                    property.set_value(object, -1);
                     return;
                 }
                 else {
@@ -178,56 +179,27 @@ namespace mapping {
 
             JSON json_value = json[property.name()];
 
-            if constexpr (Property::ValueInfo::is_map_type) {
-
-                using spes = typename Property::MapIsNotSupportedYet;
-
-                using Key   = typename Property::Value::key_type;
-                using KeyInfo = cu::TypeInfo<Key>;
-
-                for (const auto& value : json_value.get<JSON::object_t>()) {
-                    if constexpr (KeyInfo::is_string) {
-                        member[value.first] = value.second;
-                    }
-                    else if constexpr (KeyInfo::is_integer) {
-                        member[std::stoi(value.first)] = value.second;
-                    }
-                    else {
-                        //static_assert(false, "Invalid map key");
-                    }
-                }
-            }
-            else if constexpr (Property::ValueInfo::is_array_type) {
-                using Value = typename Property::Value::value_type;
-
+            if constexpr (Property::ValueInfo::is_array_type) {
+                using ArrayValue = typename Property::Value::value_type;
+                auto array = property.get_value(object);
                 for (const auto& val : json_value) {
-                    if constexpr (exists<Value>()) {
-                        member.push_back(parse_json<Value>(val));
+                    if constexpr (exists<ArrayValue>()) {
+                        array.push_back(parse_json<ArrayValue>(val));
                     }
                     else {
-                        member.push_back(val.get<Value>());
+                        array.push_back(val.get<ArrayValue>());
                     }
                 }
+                property.set_value(object, array);
             }
             else if constexpr (Property::ValueInfo::is_custom_type) {
-                if constexpr (Property::ValueInfo::is_pointer) {
-                    if (json_value.is_null()) {
-                        member = nullptr;
-                        return;
-                    }
-                    using Value = typename Property::Value;
-                    member = new Value { };
-                    *member = parse_json<Value>(json_value);
-                }
-                else {
-                    member = parse_json<Member>(json_value);
-                }
+                property.set_value(object, parse_json<Value>(json_value));
             }
             else {
                 if constexpr (check_for_input && Property::ValueInfo::is_string) {
                     check_input(json_value.get<std::string>());
                 }
-                member = json_value.get<Member>();
+                property.set_value(object, json_value.get<Value>());
             }
         }
 
