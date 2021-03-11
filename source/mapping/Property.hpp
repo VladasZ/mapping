@@ -25,17 +25,19 @@ namespace mapping {
         Unique
     };
 
-    template<auto _pointer_to_member,
-            PropertyType type = PropertyType::None,
-            bool optional = false,
-            auto getter = int { },
-            auto setter = int { }>
+    template<auto _getter,
+             auto _setter = int { },
+             PropertyType type = PropertyType::None,
+             bool optional = false>
 
     class Property {
 
     public:
 
-        using Pointer = decltype(_pointer_to_member);
+        using Getter = decltype(_getter);
+        using Setter = decltype(_setter);
+
+        using Pointer = decltype(_getter);
         using PointerInfo = cu::pointer_to_member_info<Pointer>;
 
         using Class = typename PointerInfo::Class;
@@ -43,7 +45,8 @@ namespace mapping {
 
         using ValueInfo = cu::TypeInfo<typename PointerInfo::Value>;
 
-        static constexpr auto pointer_to_member = _pointer_to_member;
+        static constexpr auto getter = _getter;
+        static constexpr auto setter = _setter;
 
         static constexpr bool is_id = type == PropertyType::ID;
         static constexpr bool is_secure = type == PropertyType::Secure;
@@ -53,14 +56,11 @@ namespace mapping {
 
         static constexpr bool is_container = ValueInfo::is_std_vector;
 
-        using Getter = decltype(getter);
-        using Setter = decltype(setter);
-
-        static constexpr bool get_set = !cu::is_int<Getter> && !cu::is_int<Getter>;
+        static constexpr bool get_set = !cu::is_int<Setter>;
 
         template <class T>
         static constexpr bool is_related_class =
-            cu::is_same_v<T, Class> || cu::is_base_of_v<Class, T>;
+                cu::is_same_v<T, Class> || cu::is_base_of_v<Class, T>;
 
         static constexpr bool is_valid = [] {
             if constexpr (is_id) {
@@ -101,21 +101,21 @@ namespace mapping {
 
         explicit constexpr Property(const std::string_view& name, const std::string_view& class_name) : _name(name), _class_name(class_name) { }
 
-        static constexpr const Value& get_value(const Class& object) {
+        static constexpr Value get_value(const Class& object) {
             if constexpr (get_set) {
-                return (object.*pointer_to_member)();
+                return (object.*getter)();
             }
             else {
-                return object.*pointer_to_member;
+                return object.*getter;
             }
         }
 
         static constexpr void set_value(Class& object, const Value& value) {
             if constexpr (get_set) {
-                return (object.*pointer_to_member)(value);
+                return (object.*setter)(value);
             }
             else {
-                object.*pointer_to_member = value;
+                object.*getter = value;
             }
         }
 
@@ -129,18 +129,18 @@ namespace mapping {
 
         std::string to_string() const {
             return std::string() + "\n" +
-                "Property: " + name() + "\n" +
-                "type: " + cu::class_name<Value>() +"\n" +
-                "of class: " + class_name() + "\n";
+                   "Property: " + name() + "\n" +
+                   "type: " + cu::class_name<Value>() +"\n" +
+                   "of class: " + class_name() + "\n";
         }
 
         std::string foreign_key() {
             return std::string() +
-               class_name() + "_" + name() + "_id";
+                   class_name() + "_" + name() + "_id";
         }
 
         static_assert(is_valid);
-        static_assert(cu::is_pointer_to_member_v<Pointer>);
+        static_assert(std::is_member_pointer_v<Pointer>);
 
     public:
 
@@ -151,7 +151,7 @@ namespace mapping {
 
 
     template <class> struct is_property : std::false_type { };
-    template <auto p, PropertyType t, bool o> struct is_property<Property<p, t, o>> : std::true_type { };
+    template <auto g, auto s, PropertyType t, bool o> struct is_property<Property<g, s, t, o>> : std::true_type { };
     template <class T> constexpr bool is_property_v = is_property<cu::remove_all_t<T>>::value;
 
 }
@@ -159,3 +159,14 @@ namespace mapping {
 #define MAKE_PROPERTY(type, name) mapping::Property<&type::name>(#name, #type)
 #define MAKE_ID_PROPERTY(type, name) mapping::Property<&type::name, mapping::PropertyType::ID>("id", #type)
 #define MAKE_SECURE_PROPERTY(type, name) mapping::Property<&type::name, mapping::PropertyType::Secure>(#name, #type)
+
+#define MAKE_GETTER_PROPERTY(type, name)       \
+mapping::Property<&type::get_##name,           \
+                  &type::set_##name            \
+>(#name, #type)
+
+//
+//PropertyType type = PropertyType::None,
+//bool optional = false,
+//auto getter = int { },
+//auto setter = int { }

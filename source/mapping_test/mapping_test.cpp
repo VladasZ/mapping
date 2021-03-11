@@ -22,6 +22,7 @@ MAKE_CLASS_INFO(TestClass,
 //    MAKE_PROPERTY(TestClass, string_string_map),
  //   MAKE_PROPERTY(TestClass, string_int_map),
  //   MAKE_PROPERTY(TestClass, int_int_map),
+    MAKE_GETTER_PROPERTY(TestClass, private_int),
     MAKE_PROPERTY(TestClass, member),
     //MAKE_PROPERTYTestClass, member_pointer),
   //  MAKE_PROPERTY(TestClass, null_member_pointer),
@@ -42,14 +43,6 @@ TestClass cl;
 
 
 void mapping::test() {
-
-
-    auto getter = &TestClass::get_private_int;
-    auto setter = &TestClass::set_private_int;
-
-    Log << (cl.*getter)();
-    (cl.*setter)(444343);
-    Log << (cl.*getter)();
 
     cl.a = 10;
     cl.b = 20;

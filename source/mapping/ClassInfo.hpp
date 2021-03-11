@@ -35,7 +35,7 @@ namespace mapping {
             cu::indexed_iterate_tuple(_properties, [&](auto index, auto property) {
                 using Property = decltype(property);
                 if constexpr (cu::is_same_v<Pointer, typename Property::Pointer>) {
-                    if constexpr (pointer == Property::pointer_to_member) {
+                    if constexpr (pointer == Property::getter) {
                         result = index;
                     }
                 }

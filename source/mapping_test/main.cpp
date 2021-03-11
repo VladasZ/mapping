@@ -1,13 +1,14 @@
 
 #include "mapping_test.hpp"
 
+#include "Log.hpp"
+#include "MetaHelpers.hpp"
+
 using namespace mapping;
 
 int main() {
 
     test();
-
-    // Log << json_mapper.to_json(Spec<int>());
 
     return 0;
 }
