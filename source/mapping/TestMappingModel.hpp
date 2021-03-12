@@ -84,7 +84,7 @@ namespace mapping {
         std::string to_string() const { return VarString(a) + " " + VarString(b) + " " + VarString(lett) + " " + VarString(member_pointer->to_string());
         }
 
-        int get_private_int() const { return _private_int; }
+        int private_int() const { return _private_int; }
         void set_private_int(int value) { _private_int = value; }
     private:
 

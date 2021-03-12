@@ -103,7 +103,12 @@ namespace mapping {
 
         static constexpr Value get_value(const Class& object) {
             if constexpr (get_set) {
-                return (object.*getter)();
+                if constexpr (ValueInfo::is_pointer) {
+                    return *(object.*getter)();
+                }
+                else {
+                    return (object.*getter)();
+                }
             }
             else {
                 return object.*getter;
@@ -160,9 +165,9 @@ namespace mapping {
 #define MAKE_ID_PROPERTY(type, name) mapping::Property<&type::name, mapping::PropertyType::ID>("id", #type)
 #define MAKE_SECURE_PROPERTY(type, name) mapping::Property<&type::name, mapping::PropertyType::Secure>(#name, #type)
 
-#define MAKE_GETTER_PROPERTY(type, name)       \
-mapping::Property<&type::get_##name,           \
-                  &type::set_##name            \
+#define MAKE_GETTER_PROPERTY(type, name) \
+mapping::Property<&type::name,           \
+                  &type::set_##name      \
 >(#name, #type)
 
 //
