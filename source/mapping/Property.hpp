@@ -101,7 +101,7 @@ namespace mapping {
 
         explicit constexpr Property(const std::string_view& name, const std::string_view& class_name) : _name(name), _class_name(class_name) { }
 
-        static constexpr Value get_value(const Class& object) {
+        static constexpr const Value get_value(const Class& object) {
             if constexpr (get_set) {
                 if constexpr (ValueInfo::is_pointer) {
                     return *(object.*getter)();
@@ -139,7 +139,7 @@ namespace mapping {
                    "of class: " + class_name() + "\n";
         }
 
-        std::string foreign_key() {
+        std::string foreign_key() const {
             return std::string() +
                    class_name() + "_" + name() + "_id";
         }
