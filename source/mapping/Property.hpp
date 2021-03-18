@@ -11,7 +11,7 @@
 #include <string>
 
 #include "Log.hpp"
-#include "TypeInfo.hpp"
+#include "DetailedTypeInfo.hpp"
 
 
 namespace mapping {
@@ -43,7 +43,7 @@ namespace mapping {
         using Class = typename PointerInfo::Class;
         using Value = std::remove_pointer_t<typename PointerInfo::Value>;
 
-        using ValueInfo = cu::TypeInfo<typename PointerInfo::Value>;
+        using ValueInfo = cu::FullTypeInfo<typename PointerInfo::Value>;
 
         static constexpr auto getter = _getter;
         static constexpr auto setter = _setter;
@@ -91,7 +91,7 @@ namespace mapping {
             }
             else if constexpr (ValueInfo::is_std_vector) {
                 using ArrayValue = typename ValueInfo::Class::value_type;
-                using ArrayValueInfo = cu::TypeInfo<ArrayValue>;
+                using ArrayValueInfo = cu::FullTypeInfo<ArrayValue>;
                 return ArrayValueInfo::is_custom_type;
             }
             else {

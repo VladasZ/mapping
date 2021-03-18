@@ -2,6 +2,7 @@
 #include "mapping_test.hpp"
 
 #include "Log.hpp"
+#include "TypeInfo.hpp"
 #include "MetaHelpers.hpp"
 
 using namespace cu;
@@ -31,10 +32,7 @@ using GetConstRefInfo = cu::pointer_to_member_info<GetConstRef>;
 template <class T>
 void test_template(const T& obj) {
     using ObjT = decltype(obj);
-    Logvar(std::is_pointer_v<T>);
-    Logvar(std::is_reference_v<T>);
-    Logvar(std::is_pointer_v<ObjT>);
-    Logvar(std::is_reference_v<ObjT>);
+    Log << TypeInfo<ObjT>::to_string();
 }
 
 
@@ -44,9 +42,9 @@ int main() {
 
     Obj obj;
 
-//    test_template(new Obj());
-//    Separator;
-//    test_template(Obj());
+    test_template(new Obj());
+    Separator;
+    test_template(Obj());
 
     Separator;
 
