@@ -99,7 +99,7 @@ namespace mapping {
                     using spes = typename Property::MapIsNotSupportedYet;
 
                     using Key = typename Property::Value::key_type;
-                    using KeyInfo = cu::TypeInfo<Key>;
+                    using KeyInfo = cu::FullTypeInfo<Key>;
 
                     for (const auto& [key, value] : Property::get_value(object)) {
                         if constexpr (KeyInfo::is_string) {
