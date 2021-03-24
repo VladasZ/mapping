@@ -102,26 +102,26 @@ namespace mapping {
         explicit constexpr Property(const std::string_view& name, const std::string_view& class_name) : _name(name), _class_name(class_name) { }
 
         static constexpr const Value get_value(const Class& object) {
-            if constexpr (get_set) {
-                if constexpr (ValueInfo::is_pointer) {
-                    return *(object.*getter)();
-                }
-                else {
-                    return (object.*getter)();
-                }
-            }
-            else {
+//            if constexpr (get_set) {
+//                if constexpr (ValueInfo::is_pointer) {
+//                    return *(object.*getter)();
+//                }
+//                else {
+//                    return (object.*getter)();
+//                }
+//            }
+//            else {
                 return object.*getter;
-            }
+          //  }
         }
 
         static constexpr void set_value(Class& object, const Value& value) {
-            if constexpr (get_set) {
-                return (object.*setter)(value);
-            }
-            else {
+           // if constexpr (get_set) {
+         //       return (object.*setter)(value);
+         //   }
+         //   else {
                 object.*getter = value;
-            }
+          //  }
         }
 
         std::string name() const {
