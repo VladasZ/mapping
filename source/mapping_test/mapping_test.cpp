@@ -43,40 +43,40 @@ TestClass cl;
 
 
 void mapping::test() {
-
-    cl.a = 10;
-    cl.b = 20;
-    cl.lett = 'A';
-
-    cl.enum_value = TestEnum::b;
-    cl.enum_class_value = TestEnumClass::d;
-
-    cl.member_pointer = new TestMember();
-    cl.member_pointer->c = 30;
-    cl.member_pointer->d = 40;
-
-    cl.int_vector = { 44, 55, 66 };
-
-    cl.members.push_back({ 1, 2 });
-    cl.members.push_back({ 3, 4 });
-
-    cl.members_pointers.push_back(new TestMember { 5, 6 });
-    cl.members_pointers.push_back(new TestMember { 7, 8 });
-
-    Log << "Class name" << mapper.class_name<TestClass>();
-    Logvar(mapper);
-
-    Log << "Property name" << mapper.property<&TestClass::a>().name();
-
-    Log << mapper.property<&TestClass::int_vector>();
-    Log << mapper.property<&TestClass::members>();
-
-
-    Log << mapper;
-
-#ifdef USING_JSON
-    json_mapper.test(cl);
-    json_mapper.test(cl);
-#endif
+//
+//    cl.a = 10;
+//    cl.b = 20;
+//    cl.lett = 'A';
+//
+//    cl.enum_value = TestEnum::b;
+//    cl.enum_class_value = TestEnumClass::d;
+//
+//    cl.member_pointer = new TestMember();
+//    cl.member_pointer->c = 30;
+//    cl.member_pointer->d = 40;
+//
+//    cl.int_vector = { 44, 55, 66 };
+//
+//    cl.members.push_back({ 1, 2 });
+//    cl.members.push_back({ 3, 4 });
+//
+//    cl.members_pointers.push_back(new TestMember { 5, 6 });
+//    cl.members_pointers.push_back(new TestMember { 7, 8 });
+//
+//    Log << "Class name" << mapper.class_name<TestClass>();
+//    Logvar(mapper);
+//
+//    Log << "Property name" << mapper.property<&TestClass::a>().name();
+//
+//    Log << mapper.property<&TestClass::int_vector>();
+//    Log << mapper.property<&TestClass::members>();
+//
+//
+//    Log << mapper;
+//
+//#ifdef USING_JSON
+//    json_mapper.test(cl);
+//    json_mapper.test(cl);
+//#endif
 
 };
