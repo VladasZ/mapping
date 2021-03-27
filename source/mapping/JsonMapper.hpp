@@ -204,9 +204,9 @@ namespace mapping {
         }
 
         static void check_input(const std::string& string) {
-            static constexpr std::array forbidded_symbols = { '\"', '\'', ':', '.', '=', '*', ';', ',', '?' };
+            static constexpr std::array forbidded_symbols = {'\"', '\'', ':', '.', '=', '*', ';', ',', '?' };
             for (auto ch : string) {
-                if (cu::array::contains(forbidded_symbols, ch)) {
+                if (cu::container::contains(forbidded_symbols, ch)) {
                     throw std::runtime_error("Invalid symbols in string: " + string);
                 };
             }
